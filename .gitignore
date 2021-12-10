@@ -1,0 +1,12 @@
+#Mac OS
+.DS_Store
+
+# environment/secrets
+.env
+.pgpass*
+.python-version
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
