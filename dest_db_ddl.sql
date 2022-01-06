@@ -2,7 +2,6 @@
 create extension if not exists "uuid-ossp";
 
 -- reference tables
-
 create table clinical_indication (
     uid uuid,
     clinical_indication_code varchar,
@@ -168,3 +167,39 @@ create table tumour_topography (
     foreign key (tumour_uid) references tumour (uid)
 );
 comment on table tumour_topography is 'Provide SNOMED topography codes for the actual or primary body site of a tumour.';
+
+-- generate random seed number for ID obfuscation
+-- patient and referral IDs are 11 digits long, so make seed that long also
+create table obfuscation_seed (
+    seed bigint
+);
+insert into obfuscation_seed (seed)
+select floor(random() * (99999999999 - 10000000000 + 1) + 10000000000);
+
+-- function for ID obfuscation
+create function obfuscate_id (
+    orig_id varchar, -- the ID to be obfuscated
+    orig_prefix varchar, -- the prefix that is used for that type of ID
+    return_prefix varchar -- the prefix for the returned, obfuscated ID
+)
+    returns varchar as
+$$
+declare
+    s obfuscation_seed.seed%type; -- copy type from the seed
+begin
+    -- get seed into function variable
+    select seed
+    from obfuscation_seed
+    into s;
+    -- obfuscate the ID:
+    -- remove the prefix, then reverse the number and do xor with the seed
+    -- convert back to bigint and add new prefix
+    return return_prefix || (
+        reverse(
+            regexp_replace(orig_id, '^' || orig_prefix, '')
+        )::bigint::bit(64)
+        # s::bit(64)
+    )::bigint::varchar;
+end;
+$$
+language plpgsql;
