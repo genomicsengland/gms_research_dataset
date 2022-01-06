@@ -203,3 +203,30 @@ begin
 end;
 $$
 language plpgsql;
+create function reverse_obfuscate_id (
+    orig_id varchar, -- the ID to be reverse_obfuscated
+    orig_prefix varchar, -- the prefix that is used for that type of ID
+    return_prefix varchar -- the prefix for the returned, obfuscated ID
+)
+    returns varchar as
+$$
+declare
+    s obfuscation_seed.seed%type; -- copy type from the seed
+begin
+    -- get seed into function variable
+    select seed
+    from obfuscation_seed
+    into s;
+    -- reverse obfuscate the ID:
+    -- remove the prefix, do xor with the seed 
+    -- convert back to bigint then varchar, reverse it and add new prefix
+    return return_prefix || 
+        reverse(
+            (regexp_replace(orig_id, '^' || orig_prefix, '')
+        ::bigint::bit(64)
+        # s::bit(64))
+    ::bigint::varchar);
+end;
+$$
+language plpgsql;
+
