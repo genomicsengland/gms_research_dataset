@@ -230,3 +230,120 @@ end;
 $$
 language plpgsql;
 
+-- final views of data to be exported
+create view vw_condition as
+select obfuscate_id(c.patient_id, 'p', 'pp') as patient_id
+    ,c.uid
+    ,c.certainty
+    ,c.code
+    ,c.code_description
+from condition c
+;
+create view vw_observation as
+select obfuscate_id(o.patient_id, 'p', 'pp') as patient_id
+    ,o.uid
+    ,o.observation_effective_from
+    ,o.code
+    ,o.code_description
+    ,o.value_code
+from observation o
+;
+create view vw_observation_component as
+select oc.uid
+    ,oc.observation_uid
+    ,oc.observation_component_code
+    ,oc.observation_component_code_description
+    ,oc.observation_component_value
+from observation_component oc
+;
+create view vw_patient as
+select obfuscate_id(p.patient_id, 'p', 'pp') as patient_id
+    ,p.uid
+    ,p.patient_year_of_birth
+    ,p.patient_year_of_death
+    ,p.patient_is_foetal_patient
+    ,p.administrative_gender
+    ,p.ethnicity
+    ,p.ethnicity_description
+    ,p.life_status
+    ,p.karyotypic_sex
+    ,p.phenotypic_sex
+from patient p
+;
+create view vw_referral as
+select obfuscate_id(r.referral_id, 'r', 'rr')
+    ,r.uid
+    ,r.status
+    ,r.intent
+    ,r.priority
+    ,ci.clinical_indication_code
+    ,ci.clinical_indication_full_name
+    ,oe.ordering_entity_name
+    ,oe.ordering_entity_code
+    ,r.tumour_uid
+from referral r
+left join clinical_indication ci
+    on r.clinical_indication_uid = ci.uid
+left join ordering_entity oe
+    on r.ordering_entity_uid = oe.uid
+;
+create view vw_referral_participant as
+select obfuscate_id(rp.patient_id, 'p', 'pp') as patient_id
+    ,obfuscate_id(rp.referral_id, 'r', 'rr') as referral_id
+    ,rp.uid
+    ,rp.referral_participant_is_proband
+    ,rp.disease_status
+    ,rp.referral_participant_age_at_onset
+    ,rp.relationship_to_proband
+from referral_participant rp
+;
+create view vw_referral_sample as
+select obfuscate_id(rs.referral_id, 'r', 'rr') as referral_id
+    ,rs.uid
+    ,rs.sample_uid
+from referral_sample rs
+;
+create view vw_referral_test as
+select obfuscate_id(rt.referral_id, 'r', 'rr')
+    ,rt.uid
+    ,rt.referral_test_expected_number_of_patients
+from referral_test rt
+;
+create view vw_sample as
+select obfuscate_id(s.patient_id, 'p', 'pp') as patient_id
+    ,s.uid
+    ,s.percentage_of_malignant_cells
+    ,s.sample_morphology
+    ,s.sample_state
+    ,s.sample_topography
+    ,s.sample_type
+    ,s.tumour_uid
+    ,s.sample_collection_date
+from sample s
+;
+create view vw_tumour as
+select obfuscate_id(t.patient_id, 'p', 'pp') as patient_id
+    ,t.uid
+    ,t.tumour_type
+    ,t.presentation
+    ,t.tumour_diagnosis_day
+    ,t.tumour_diagnosis_month
+    ,t.tumour_diagnosis_year
+from tumour t
+;
+create view vw_tumour_morphology as
+select tm.uid
+    ,tm.tumour_uid
+    ,tm.morphology
+from tumour_morphology tm
+;
+create view vw_tumour_topography as
+select tt.uid
+    ,tt.tumour_uid
+    ,tt.actual_body_site
+    ,tt.actual_body_site_description
+    ,tt.primary_body_site
+    ,tt.primary_body_site_description
+from tumour_topography tt
+;
+
