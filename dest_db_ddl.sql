@@ -228,6 +228,12 @@ create table obfuscation_seed (
 insert into obfuscation_seed (seed)
 select floor(random() * (99999999999 - 10000000000 + 1) + 10000000000);
 
+-- create table to hold release date
+create table release (
+    version int,
+    release_date date
+);
+
 -- function for ID obfuscation
 create function obfuscate_id (
     orig_id varchar, -- the ID to be obfuscated

@@ -36,3 +36,4 @@ drop table tumour_topography cascade;
 drop table laboratory_sample cascade;
 drop table plated_sample cascade;
 drop table plated_sample_qc cascade;
+drop table release cascade;
