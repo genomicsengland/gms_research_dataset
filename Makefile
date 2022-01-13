@@ -1,10 +1,13 @@
 include .env
 
+psql_cmd = psql -h $(DEST_DB_HOST) -p $(DEST_DB_PORT) -U $(DEST_DB_USER) $(DEST_DB_NAME)
+
 build_dest_db:
-	psql -h $(DEST_DB_HOST) -p $(DEST_DB_PORT) -U $(DEST_DB_USER) $(DEST_DB_NAME) < dest_db_ddl.sql
+	$(psql_cmd) < dest_db_ddl.sql
+	$(psql_cmd) -c 'insert into release (version, release_date) values ($(RELEASE_VERSION), $(RELEASE_DATE)::text::date);'
 
 drop_dest_db:
-	psql -h $(DEST_DB_HOST) -p $(DEST_DB_PORT) -U $(DEST_DB_USER) $(DEST_DB_NAME) < drop_dest_db.sql
+	$(psql_cmd) < drop_dest_db.sql
 
 populate_data:
 	python data_transfer.py
