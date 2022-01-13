@@ -131,6 +131,7 @@ create table sample (
     sample_type varchar,
     tumour_uid uuid,
     sample_collection_date date,
+    sample_id_glh varchar,
     primary key (uid),
     foreign key (patient_id) references patient (patient_id),
     foreign key (tumour_uid) references tumour (uid)
@@ -167,6 +168,41 @@ create table tumour_topography (
     foreign key (tumour_uid) references tumour (uid)
 );
 comment on table tumour_topography is 'Provide SNOMED topography codes for the actual or primary body site of a tumour.';
+
+create table laboratory_sample (
+    primary_sample_id_received_glh varchar,
+    primary_sample_id_glh_lims varchar,
+    type varchar,
+    state varchar,
+    collection_date timestamptz,
+    concentration_ng_ul_glh numeric,
+    od_260_280_glh numeric,
+    din_value_glh numeric,
+    percentage_dna_glh numeric,
+    qc_status_glh varchar,
+    dna_extraction_protocol varchar,
+    gel1001_id bigint,
+    primary key (gel1001_id)
+);
+comment on table laboratory_sample is 'Provides metadata and quality control data on samples processed by the GLH laboratories';
+
+create table plated_sample (
+    gel1001_id bigint,
+    platekey varchar,
+    primary key (platekey),
+    foreign key (gel1001_id) references laboratory_sample (gel1001_id)
+);
+comment on table plated_sample is 'Provides the platekey for plated laboratory samples';
+
+create table plated_sample_qc (
+    platekey varchar,
+    illumina_qc_status varchar,
+    illumina_sample_concentration numeric,
+    dna_amount numeric,
+    primary key (platekey),
+    foreign key (platekey) references plated_sample (platekey)
+);
+comment on table plated_sample_qc is 'Provides presequencing quality control data on plated laboratory samples';
 
 create table consent (
     patient_uid uuid,

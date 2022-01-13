@@ -33,3 +33,6 @@ drop table sample cascade;
 drop table tumour cascade;
 drop table tumour_morphology cascade;
 drop table tumour_topography cascade;
+drop table laboratory_sample cascade;
+drop table plated_sample cascade;
+drop table plated_sample_qc cascade;
