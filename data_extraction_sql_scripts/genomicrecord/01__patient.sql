@@ -1,7 +1,7 @@
 select
     p.uid
     ,p.patient_human_readable_stored_id as patient_id
-    ,extract('year' from p.patient_date_of_birth) as patient_year_of_birth
+    ,p.patient_date_of_birth
     ,extract('year' from p.patient_date_of_death) as patient_year_of_death
     ,p.patient_is_foetal_patient
 /* no data    ,p.patient_fetus_current_gestation */

@@ -22,7 +22,7 @@ comment on table ordering_entity is 'Reference table providing organisation/orde
 create table patient (
     uid uuid,
     patient_id varchar unique not null,
-    patient_year_of_birth int,
+    patient_date_of_birth date,
     patient_year_of_death int,
     patient_is_foetal_patient bool,
     administrative_gender varchar,
@@ -168,6 +168,22 @@ create table tumour_topography (
 );
 comment on table tumour_topography is 'Provide SNOMED topography codes for the actual or primary body site of a tumour.';
 
+create table consent (
+    patient_uid uuid,
+    referral_uid uuid,
+    consent_questionnaire_response_uid uuid,
+    consent_uid uuid,
+    consent_form varchar,
+    status varchar,
+    research_answer_given varchar,
+    recency int,
+    last_updated timestamp,
+    primary key (consent_questionnaire_response_uid),
+    foreign key (patient_uid) references patient (uid),
+    foreign key (referral_uid) references referral (uid)
+);
+comment on table consent is 'Reference table for consent data used for generation of participant list';
+
 -- generate random seed number for ID obfuscation
 -- patient and referral IDs are 11 digits long, so make seed that long also
 create table obfuscation_seed (
@@ -259,7 +275,7 @@ from observation_component oc
 create view vw_patient as
 select obfuscate_id(p.patient_id, 'p', 'pp') as patient_id
     ,p.uid
-    ,p.patient_year_of_birth
+    ,extract('year' from p.patient_date_of_birth) as patient_year_of_birth
     ,p.patient_year_of_death
     ,p.patient_is_foetal_patient
     ,p.administrative_gender
