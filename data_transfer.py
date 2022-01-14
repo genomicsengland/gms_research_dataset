@@ -80,4 +80,5 @@ if __name__ == '__main__':
 
                 d = pd.read_sql(s, conn)
 
-                d.to_sql(os.path.splitext(tab)[0].split('__')[1], dest_conn, index = False, if_exists = 'append')
+                d.to_sql(os.path.splitext(tab)[0].split('__')[1], dest_conn,
+                         index = False, if_exists = 'append', schema = os.getenv('DEST_DB_SCHEMA'))
