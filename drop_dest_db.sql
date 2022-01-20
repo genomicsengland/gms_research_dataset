@@ -1,17 +1,20 @@
 -- drop all the views
-drop view vw_condition;
-drop view vw_observation;
-drop view vw_observation_component;
-drop view vw_patient;
-drop view vw_plated_sample;
-drop view vw_referral;
-drop view vw_referral_participant;
-drop view vw_referral_sample;
-drop view vw_referral_test;
-drop view vw_sample;
-drop view vw_tumour;
-drop view vw_tumour_morphology;
-drop view vw_tumour_topography;
+drop view vw_condition cascade;
+drop view vw_eligible_patient cascade;
+drop view vw_eligible_referral cascade;
+drop view vw_observation cascade;
+drop view vw_observation_component cascade;
+drop view vw_patient cascade;
+drop view vw_patient_list cascade;
+drop view vw_plated_sample cascade;
+drop view vw_referral cascade;
+drop view vw_referral_participant cascade;
+drop view vw_referral_sample cascade;
+drop view vw_referral_test cascade;
+drop view vw_sample cascade;
+drop view vw_tumour cascade;
+drop view vw_tumour_morphology cascade;
+drop view vw_tumour_topography cascade;
 
 -- drop functions
 drop function obfuscate_id;

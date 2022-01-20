@@ -291,6 +291,78 @@ $$
 language plpgsql;
 
 -- final views of data to be exported
+create view vw_patient_list as 
+with in_valid_referral as (
+    -- get patients who are in valid referrals
+    select distinct patient_id
+    from referral_participant rp 
+    join referral r on rp.referral_id = r.referral_id 
+    where r.status in ('active', 'completed')
+),
+agreed_to_research as (
+    -- get those who answered yes to R2 consent question when most recently asked
+    select p.patient_id
+    from patient p 
+    join (select patient_uid, research_answer_given from consent where recency = 1) c 
+        on c.patient_uid = p.uid 
+    where c.research_answer_given ilike 'yes'
+),
+on_child_consent as (
+    -- get those who have most recently consented with a consultee form
+    -- not working at present because consultee form data not being written correctly
+    -- (I think) 
+    select p.patient_id
+    from patient p
+    join (select patient_uid, consent_form from consent where recency = 1) c 
+        on c.patient_uid = p.uid 
+    where c.consent_form ilike 'consultee%'
+),
+under_sixteen as (
+    -- get patients who have not had a sixteen birthday by the time of release
+    select p.patient_id
+    from patient p 
+    join release r on true
+    where extract('year' from age(r.release_date, p.patient_date_of_birth)) < 16
+),
+deceased as (
+    -- get all patients who were not alive at consent
+    select p.patient_id
+    from patient p
+    where p.life_status != 'alive'
+)
+select p.patient_id 
+    ,ivr.patient_id is not null as in_valid_referral
+    ,a2r.patient_id is not null as agreed_to_research 
+    ,occ.patient_id is not null as on_child_consent 
+    ,us.patient_id is not null as under_sixteen
+    ,dec.patient_id is not null as deceased
+    -- patient is eligible if:
+    ,ivr.patient_id is not null and  --       they are in a valid referral
+    a2r.patient_id is not null and --         AND they agreed to research
+    (occ.patient_id is null or --             AND (they are not on child consent
+        (occ.patient_id is not null and  --         OR ( they are on child consent
+            (us.patient_id is not null or  --            AND ( they are under sixteen
+            dec.patient_id is not null) --                      OR they are deceased ))
+        )
+    ) as eligible
+from patient p
+left join in_valid_referral ivr on ivr.patient_id = p.patient_id
+left join agreed_to_research a2r on a2r.patient_id = p.patient_id
+left join on_child_consent occ on occ.patient_id = p.patient_id
+left join under_sixteen us on us.patient_id = p.patient_id
+left join deceased dec on dec.patient_id = p.patient_id
+;
+create view vw_eligible_patient as 
+select pl.patient_id
+from vw_patient_list pl
+where pl.eligible = true
+;
+create view vw_eligible_referral as
+select distinct rp.referral_id
+from referral_participant rp
+join vw_eligible_patient ep
+on rp.patient_id = ep.patient_id
+;
 create view vw_condition as
 select obfuscate_id(c.patient_id, 'p', 'pp') as patient_id
     ,c.uid
@@ -298,6 +370,7 @@ select obfuscate_id(c.patient_id, 'p', 'pp') as patient_id
     ,c.code
     ,c.code_description
 from condition c
+join vw_eligible_patient ep on c.patient_id = ep.patient_id
 ;
 create view vw_observation as
 select obfuscate_id(o.patient_id, 'p', 'pp') as patient_id
@@ -307,6 +380,7 @@ select obfuscate_id(o.patient_id, 'p', 'pp') as patient_id
     ,o.code_description
     ,o.value_code
 from observation o
+join vw_eligible_patient ep on o.patient_id = ep.patient_id
 ;
 create view vw_observation_component as
 select oc.uid
@@ -315,6 +389,7 @@ select oc.uid
     ,oc.observation_component_code_description
     ,oc.observation_component_value
 from observation_component oc
+join vw_observation o on o.uid = oc.observation_uid
 ;
 create view vw_patient as
 select obfuscate_id(p.patient_id, 'p', 'pp') as patient_id
@@ -329,9 +404,21 @@ select obfuscate_id(p.patient_id, 'p', 'pp') as patient_id
     ,p.karyotypic_sex
     ,p.phenotypic_sex
 from patient p
+join vw_eligible_patient ep on p.patient_id = ep.patient_id
+;
+create view vw_referral_participant as
+select obfuscate_id(rp.patient_id, 'p', 'pp') as patient_id
+    ,obfuscate_id(rp.referral_id, 'r', 'rr') as referral_id
+    ,rp.uid
+    ,rp.referral_participant_is_proband
+    ,rp.disease_status
+    ,rp.referral_participant_age_at_onset
+    ,rp.relationship_to_proband
+from referral_participant rp
+join vw_eligible_patient ep on rp.patient_id = ep.patient_id
 ;
 create view vw_referral as
-select obfuscate_id(r.referral_id, 'r', 'rr')
+select obfuscate_id(r.referral_id, 'r', 'rr') as referral_id
     ,r.uid
     ,r.status
     ,r.priority
@@ -345,22 +432,14 @@ left join clinical_indication ci
     on r.clinical_indication_uid = ci.uid
 left join ordering_entity oe
     on r.ordering_entity_uid = oe.uid
-;
-create view vw_referral_participant as
-select obfuscate_id(rp.patient_id, 'p', 'pp') as patient_id
-    ,obfuscate_id(rp.referral_id, 'r', 'rr') as referral_id
-    ,rp.uid
-    ,rp.referral_participant_is_proband
-    ,rp.disease_status
-    ,rp.referral_participant_age_at_onset
-    ,rp.relationship_to_proband
-from referral_participant rp
+join vw_eligible_referral er on r.referral_id = er.referral_id
 ;
 create view vw_referral_test as
 select obfuscate_id(rt.referral_id, 'r', 'rr') as referral_id
     ,rt.uid
     ,rt.referral_test_expected_number_of_patients
 from referral_test rt
+join vw_eligible_referral er on rt.referral_id = er.referral_id
 ;
 create view vw_sample as
 with dedup_sample as (
@@ -400,6 +479,7 @@ left join dedup_sample s
         (ls.primary_sample_id_received_glh is not null and s.sample_id_glh is not null and ls.primary_sample_id_received_glh = s.sample_id_glh) or
         (ls.primary_sample_id_glh_lims is not null and s.sample_id_glh is not null and ls.primary_sample_id_glh_lims = s.sample_id_glh)
     )
+join vw_eligible_patient ep on ls.patient_id = ep.patient_id
 ;
 create view vw_plated_sample as
 select p.gel1001_id as sample_id
@@ -410,6 +490,7 @@ select p.gel1001_id as sample_id
 from plated_sample p
 left join plated_sample_qc qc
     on p.platekey = qc.platekey
+join vw_sample s on p.gel1001_id = s.sample_id
 ;
 create view vw_tumour as
 select obfuscate_id(t.patient_id, 'p', 'pp') as patient_id
@@ -420,12 +501,14 @@ select obfuscate_id(t.patient_id, 'p', 'pp') as patient_id
     ,t.tumour_diagnosis_month
     ,t.tumour_diagnosis_year
 from tumour t
+join vw_eligible_patient ep on t.patient_id = ep.patient_id
 ;
 create view vw_tumour_morphology as
 select tm.uid
     ,tm.tumour_uid
     ,tm.morphology
 from tumour_morphology tm
+join vw_tumour t on t.uid = tm.tumour_uid
 ;
 create view vw_tumour_topography as
 select tt.uid
@@ -435,5 +518,5 @@ select tt.uid
     ,tt.primary_body_site
     ,tt.primary_body_site_description
 from tumour_topography tt
+join vw_tumour t on t.uid = tt.tumour_uid
 ;
-

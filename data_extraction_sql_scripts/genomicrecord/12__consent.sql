@@ -38,5 +38,5 @@ left join consent_questionnaire cq on cqr.consent_questionnaire_uid = cq.uid
 left join r2_answer r2 on r2.consent_uid = cqr.consent_uid
 -- some patients feature in consent data which aren't in patient table, remove them
 left join patient p on sid.value = p.uid::varchar
-where cq.name not in ('Patient Level Questions') and p.uid is not null
+where /*cq.name not in ('Patient Level Questions') and*/ p.uid is not null
 ;
