@@ -334,7 +334,6 @@ create view vw_referral as
 select obfuscate_id(r.referral_id, 'r', 'rr')
     ,r.uid
     ,r.status
-    ,r.intent
     ,r.priority
     ,ci.clinical_indication_code
     ,ci.clinical_indication_full_name
