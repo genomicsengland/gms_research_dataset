@@ -356,14 +356,8 @@ select obfuscate_id(rp.patient_id, 'p', 'pp') as patient_id
     ,rp.relationship_to_proband
 from referral_participant rp
 ;
-create view vw_referral_sample as
-select obfuscate_id(rs.referral_id, 'r', 'rr') as referral_id
-    ,rs.uid
-    ,rs.sample_uid
-from referral_sample rs
-;
 create view vw_referral_test as
-select obfuscate_id(rt.referral_id, 'r', 'rr')
+select obfuscate_id(rt.referral_id, 'r', 'rr') as referral_id
     ,rt.uid
     ,rt.referral_test_expected_number_of_patients
 from referral_test rt
@@ -372,6 +366,7 @@ create view vw_sample as
 with dedup_sample as (
     select distinct s.sample_id_glh
         ,s.patient_id
+        ,rs.referral_id
         ,s.percentage_of_malignant_cells
         ,s.sample_morphology
         ,s.sample_state
@@ -379,9 +374,11 @@ with dedup_sample as (
         ,s.sample_type
         ,s.tumour_uid
     from sample s
+    join referral_sample rs on rs.sample_uid = s.uid
 )
 select ls.gel1001_id as sample_id
     ,obfuscate_id(ls.patient_id, 'p', 'pp') as patient_id
+    ,obfuscate_id(ls.referral_id, 'r', 'rr') as referral_id
     ,ls.type
     ,ls.state
     ,ls.collection_date
