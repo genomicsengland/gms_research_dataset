@@ -172,6 +172,8 @@ comment on table tumour_topography is 'Provide SNOMED topography codes for the a
 create table laboratory_sample (
     primary_sample_id_received_glh varchar,
     primary_sample_id_glh_lims varchar,
+    patient_id varchar,
+    referral_id varchar,
     type varchar,
     state varchar,
     collection_date timestamptz,
@@ -368,16 +370,50 @@ select obfuscate_id(rt.referral_id, 'r', 'rr')
 from referral_test rt
 ;
 create view vw_sample as
-select obfuscate_id(s.patient_id, 'p', 'pp') as patient_id
-    ,s.uid
+with dedup_sample as (
+    select distinct s.sample_id_glh
+        ,s.patient_id
+        ,s.percentage_of_malignant_cells
+        ,s.sample_morphology
+        ,s.sample_state
+        ,s.sample_topography
+        ,s.sample_type
+        ,s.tumour_uid
+    from sample s
+)
+select ls.gel1001_id as sample_id
+    ,obfuscate_id(ls.patient_id, 'p', 'pp') as patient_id
+    ,ls.type
+    ,ls.state
+    ,ls.collection_date
+    ,ls.concentration_ng_ul_glh
+    ,ls.od_260_280_glh
+    ,ls.din_value_glh
+    ,ls.percentage_dna_glh
+    ,ls.qc_status_glh
+    ,ls.dna_extraction_protocol
     ,s.percentage_of_malignant_cells
     ,s.sample_morphology
     ,s.sample_state
     ,s.sample_topography
     ,s.sample_type
     ,s.tumour_uid
-    ,s.sample_collection_date
-from sample s
+from laboratory_sample ls
+left join dedup_sample s
+    on (
+        (ls.primary_sample_id_received_glh is not null and s.sample_id_glh is not null and ls.primary_sample_id_received_glh = s.sample_id_glh) or
+        (ls.primary_sample_id_glh_lims is not null and s.sample_id_glh is not null and ls.primary_sample_id_glh_lims = s.sample_id_glh)
+    )
+;
+create view vw_plated_sample as
+select p.gel1001_id as sample_id
+    ,p.platekey
+    ,qc.illumina_qc_status
+    ,qc.illumina_sample_concentration
+    ,qc.dna_amount
+from plated_sample p
+left join plated_sample_qc qc
+    on p.platekey = qc.platekey
 ;
 create view vw_tumour as
 select obfuscate_id(t.patient_id, 'p', 'pp') as patient_id

@@ -16,11 +16,11 @@ select primary_sample_id_received_glh
 /* irrelevant    ,created */
 /* irrelevant    ,warning_msgs */
 /* irrelevant    ,row */
-/* irrelevant    ,referral_id */
+    ,referral_id
 /* irrelevant    ,clinical_indication_test_type_id */
 /* irrelevant    ,clinical_indication_test_type_uid */
 /* irrelevant    ,patient_nhs_number */
-/* irrelevant    ,patient_ngis_id */
+    ,patient_ngis_id as patient_id
 /* irrelevant    ,ordering_entity_id */
 /* irrelevant    ,glh_laboratory_id */
 /* irrelevant    ,primary_sample_received_date */
