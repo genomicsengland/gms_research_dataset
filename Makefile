@@ -13,3 +13,6 @@ populate_data:
 	python data_transfer.py
 
 build_and_populate: build_dest_db populate_data
+
+export_dataset:
+	bash export_tables.sh
