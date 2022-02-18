@@ -451,7 +451,7 @@ with dedup_sample as (
     from sample s
     join referral_sample rs on rs.sample_uid = s.uid
 )
-select ls.gel1001_id as sample_id
+select obfuscate_id(ls.gel1001_id::varchar, '', 'ss') as sample_id
     ,obfuscate_id(ls.patient_id, 'p', 'pp') as patient_id
     ,obfuscate_id(ls.referral_id, 'r', 'rr') as referral_id
     ,ls.type
@@ -476,7 +476,7 @@ left join dedup_sample s
 join vw_eligible_patient ep on ls.patient_id = ep.patient_id
 ;
 create view vw_plated_sample as
-select p.gel1001_id as sample_id
+select obfuscate_id(p.gel1001_id::varchar, '', 'ss') as sample_id
     ,p.platekey
     ,qc.illumina_qc_status
     ,qc.illumina_sample_concentration
@@ -484,7 +484,7 @@ select p.gel1001_id as sample_id
 from plated_sample p
 left join plated_sample_qc qc
     on p.platekey = qc.platekey
-join vw_sample s on p.gel1001_id = s.sample_id
+join vw_sample s on obfuscate_id(p.gel1001_id::varchar, '', 'ss') = s.sample_id
 ;
 create view vw_tumour as
 select obfuscate_id(t.patient_id, 'p', 'pp') as patient_id
