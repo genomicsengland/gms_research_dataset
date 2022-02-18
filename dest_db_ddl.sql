@@ -126,9 +126,7 @@ create table sample (
     patient_id varchar,
     percentage_of_malignant_cells int,
     sample_morphology varchar,
-    sample_state varchar,
     sample_topography varchar,
-    sample_type varchar,
     tumour_uid uuid,
     sample_collection_date date,
     sample_id_glh varchar,
@@ -448,9 +446,7 @@ with dedup_sample as (
         ,rs.referral_id
         ,s.percentage_of_malignant_cells
         ,s.sample_morphology
-        ,s.sample_state
         ,s.sample_topography
-        ,s.sample_type
         ,s.tumour_uid
     from sample s
     join referral_sample rs on rs.sample_uid = s.uid
@@ -469,9 +465,7 @@ select ls.gel1001_id as sample_id
     ,ls.dna_extraction_protocol
     ,s.percentage_of_malignant_cells
     ,s.sample_morphology
-    ,s.sample_state
     ,s.sample_topography
-    ,s.sample_type
     ,s.tumour_uid
 from laboratory_sample ls
 left join dedup_sample s

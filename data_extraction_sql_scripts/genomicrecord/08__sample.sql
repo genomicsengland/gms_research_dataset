@@ -10,9 +10,9 @@ select
 /* no data    ,s.sample_ready_for_dispatch */
 /* no data    ,s.sample_requested_for_other_test */
 /* no data    ,sample_shipping_status_concept.concept_code as sample_shipping_status */
-    ,sample_state_concept.concept_code as sample_state
+/* better data available in biobank    ,sample_state_concept.concept_code as sample_state */
     ,sample_topography_concept.concept_code as sample_topography
-    ,sample_type_concept.concept_code as sample_type
+/* better data available in biobank    ,sample_type_concept.concept_code as sample_type */
     ,s.tumour_uid
 /* no data    ,s.additional_data */
     ,s.sample_collection_date
