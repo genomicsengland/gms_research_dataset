@@ -205,18 +205,14 @@ create table plated_sample_qc (
 comment on table plated_sample_qc is 'Provides presequencing quality control data on plated laboratory samples';
 
 create table consent (
-    patient_uid uuid,
-    referral_uid uuid,
-    consent_questionnaire_response_uid uuid,
     consent_uid uuid,
-    consent_form varchar,
-    status varchar,
+    patient_uid uuid,
     research_answer_given varchar,
+    consent_category varchar,
+    consent_date timestamp,
     recency int,
-    last_updated timestamp,
-    primary key (consent_questionnaire_response_uid),
-    foreign key (patient_uid) references patient (uid),
-    foreign key (referral_uid) references referral (uid)
+    primary key (consent_uid, recency),
+    foreign key (patient_uid) references patient (uid)
 );
 comment on table consent is 'Reference table for consent data used for generation of participant list';
 
@@ -306,16 +302,21 @@ agreed_to_research as (
     where c.research_answer_given ilike 'yes'
 ),
 on_child_consent as (
-    -- get those who have most recently consented with a consultee form
-    -- not working at present because consultee form data not being written correctly
-    -- (I think) 
+    -- get those who have most recently consented as child
     select p.patient_id
     from patient p
-    join (select patient_uid, consent_form from consent where recency = 1) c 
+    join (select patient_uid, consent_category from consent where recency = 1) c 
         on c.patient_uid = p.uid 
-    where c.consent_form ilike 'consultee%'
+    where c.consent_category ilike 'child'
 ),
-under_sixteen as (
+under_sixteen_at_consent as (
+    -- get patients who were under sixteen at consent
+    select p.patient_id
+    from patient p 
+    join consent c on c.patient_uid = p.uid
+    where extract('year' from age(c.consent_date, p.patient_date_of_birth)) < 16
+),
+under_sixteen_at_release as (
     -- get patients who have not had a sixteen birthday by the time of release
     select p.patient_id
     from patient p 
@@ -332,22 +333,25 @@ select p.patient_id
     ,ivr.patient_id is not null as in_valid_referral
     ,a2r.patient_id is not null as agreed_to_research 
     ,occ.patient_id is not null as on_child_consent 
-    ,us.patient_id is not null as under_sixteen
+    ,usac.patient_id is not null as under_sixteen_at_consent
+    ,usar.patient_id is not null as under_sixteen_at_release
     ,dec.patient_id is not null as deceased
     -- patient is eligible if:
-    ,ivr.patient_id is not null and  --       they are in a valid referral
-    a2r.patient_id is not null and --         AND they agreed to research
-    (occ.patient_id is null or --             AND (they are not on child consent
-        (occ.patient_id is not null and  --         OR ( they are on child consent
-            (us.patient_id is not null or  --            AND ( they are under sixteen
-            dec.patient_id is not null) --                      OR they are deceased ))
-        )
-    ) as eligible
+    ,ivr.patient_id is not null and               -- they are in a valid referral AND
+    a2r.patient_id is not null and                -- they agreed to research AND
+    (occ.patient_id is null or                    -- (they are not on child consent OR
+        (occ.patient_id is not null and           --    (they are on child consent AND
+            (usac.patient_id is null or           --       (they were over 16 at consent OR
+                (usac.patient_id is not null and  --          (they are under sixteen at consent AND
+                usar.patient_id is not null) or   --           they are under sixteen at release) OR
+            dec.patient_id is not null))          --        they are deceased))
+    ) as eligible                                 -- )   
 from patient p
 left join in_valid_referral ivr on ivr.patient_id = p.patient_id
 left join agreed_to_research a2r on a2r.patient_id = p.patient_id
 left join on_child_consent occ on occ.patient_id = p.patient_id
-left join under_sixteen us on us.patient_id = p.patient_id
+left join under_sixteen_at_consent usac on usac.patient_id = p.patient_id
+left join under_sixteen_at_release usar on usar.patient_id = p.patient_id
 left join deceased dec on dec.patient_id = p.patient_id
 ;
 create view vw_eligible_patient as 
