@@ -47,4 +47,3 @@ for i in ${reference_tables[@]}
 do
     export_table $i $output_fldr_ref/$i.tsv
 done
-

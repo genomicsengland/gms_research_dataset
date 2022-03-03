@@ -272,9 +272,9 @@ begin
     from obfuscation_seed
     into s;
     -- reverse obfuscate the ID:
-    -- remove the prefix, do xor with the seed 
+    -- remove the prefix, do xor with the seed
     -- convert back to bigint then varchar, reverse it and add new prefix
-    return return_prefix || 
+    return return_prefix ||
         reverse(
             (regexp_replace(orig_id, '^' || orig_prefix, '')
         ::bigint::bit(64)
@@ -285,41 +285,41 @@ $$
 language plpgsql;
 
 -- final views of data to be exported
-create view vw_patient_list as 
+create view vw_patient_list as
 with in_valid_referral as (
     -- get patients who are in valid referrals
     select distinct patient_id
-    from referral_participant rp 
-    join referral r on rp.referral_id = r.referral_id 
+    from referral_participant rp
+    join referral r on rp.referral_id = r.referral_id
     where r.status in ('active', 'completed')
 ),
 agreed_to_research as (
     -- get those who answered yes to R2 consent question when most recently asked
     select p.patient_id
-    from patient p 
-    join (select patient_uid, research_answer_given from consent where recency = 1) c 
-        on c.patient_uid = p.uid 
+    from patient p
+    join (select patient_uid, research_answer_given from consent where recency = 1) c
+        on c.patient_uid = p.uid
     where c.research_answer_given ilike 'yes'
 ),
 on_child_consent as (
     -- get those who have most recently consented as child
     select p.patient_id
     from patient p
-    join (select patient_uid, consent_category from consent where recency = 1) c 
-        on c.patient_uid = p.uid 
+    join (select patient_uid, consent_category from consent where recency = 1) c
+        on c.patient_uid = p.uid
     where c.consent_category ilike 'child'
 ),
 under_sixteen_at_consent as (
     -- get patients who were under sixteen at consent
     select p.patient_id
-    from patient p 
+    from patient p
     join consent c on c.patient_uid = p.uid
     where extract('year' from age(c.consent_date, p.patient_date_of_birth)) < 16
 ),
 under_sixteen_at_release as (
     -- get patients who have not had a sixteen birthday by the time of release
     select p.patient_id
-    from patient p 
+    from patient p
     join release r on true
     where extract('year' from age(r.release_date, p.patient_date_of_birth)) < 16
 ),
@@ -329,10 +329,10 @@ deceased as (
     from patient p
     where p.life_status != 'alive'
 )
-select p.patient_id 
+select p.patient_id
     ,ivr.patient_id is not null as in_valid_referral
-    ,a2r.patient_id is not null as agreed_to_research 
-    ,occ.patient_id is not null as on_child_consent 
+    ,a2r.patient_id is not null as agreed_to_research
+    ,occ.patient_id is not null as on_child_consent
     ,usac.patient_id is not null as under_sixteen_at_consent
     ,usar.patient_id is not null as under_sixteen_at_release
     ,dec.patient_id is not null as deceased
@@ -345,7 +345,7 @@ select p.patient_id
                 (usac.patient_id is not null and  --          (they are under sixteen at consent AND
                 usar.patient_id is not null) or   --           they are under sixteen at release) OR
             dec.patient_id is not null))          --        they are deceased))
-    ) as eligible                                 -- )   
+    ) as eligible                                 -- )
 from patient p
 left join in_valid_referral ivr on ivr.patient_id = p.patient_id
 left join agreed_to_research a2r on a2r.patient_id = p.patient_id
@@ -354,7 +354,7 @@ left join under_sixteen_at_consent usac on usac.patient_id = p.patient_id
 left join under_sixteen_at_release usar on usar.patient_id = p.patient_id
 left join deceased dec on dec.patient_id = p.patient_id
 ;
-create view vw_eligible_patient as 
+create view vw_eligible_patient as
 select pl.patient_id
 from vw_patient_list pl
 where pl.eligible = true

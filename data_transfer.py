@@ -1,26 +1,24 @@
 import os
 from string import Template
-import pandas as pd
-from sqlalchemy import create_engine
-from dotenv import load_dotenv
 
-sql_script_location = "data_extraction_sql_scripts"
+import pandas as pd
+from dotenv import load_dotenv
+from sqlalchemy import create_engine
+
+sql_script_location = 'data_extraction_sql_scripts'
 load_dotenv()
+
 
 def get_engine(host, port, db, user, pwd):
     """
     return a db connection engine for the given db
     """
     conn_string = 'postgresql+psycopg2://$user:$pwd@$host:$port/$db'
-    db_conn_string = Template(conn_string).\
-        safe_substitute({
-            'host': host,
-            'port': port,
-            'db':  db,
-            'user': user,
-            'pwd': pwd
-        })
+    db_conn_string = Template(conn_string).safe_substitute(
+        {'host': host, 'port': port, 'db': db, 'user': user, 'pwd': pwd}
+    )
     return create_engine(db_conn_string)
+
 
 def get_ngis_db_engine(db):
     return get_engine(
@@ -28,8 +26,9 @@ def get_ngis_db_engine(db):
         os.getenv('SRC_DB_PORT'),
         'ngis_' + db + '_prod',
         os.getenv('SRC_DB_USER'),
-        os.getenv('SRC_DB_PWD')
+        os.getenv('SRC_DB_PWD'),
     ).connect()
+
 
 def get_dest_connection():
     return get_engine(
@@ -37,8 +36,9 @@ def get_dest_connection():
         os.getenv('DEST_DB_PORT'),
         os.getenv('DEST_DB_NAME'),
         os.getenv('DEST_DB_USER'),
-        os.getenv('DEST_DB_PWD')
+        os.getenv('DEST_DB_PWD'),
     ).connect()
+
 
 def list_sql_scripts(loc):
     """
@@ -59,8 +59,9 @@ def list_sql_scripts(loc):
                 d = os.path.basename(root)
 
                 out[d].append(f)
-    
+
     return out
+
 
 if __name__ == '__main__':
 
@@ -80,5 +81,9 @@ if __name__ == '__main__':
 
                 d = pd.read_sql(s, conn)
 
-                d.to_sql(os.path.splitext(tab)[0].split('__')[1], dest_conn,
-                         index = False, if_exists = 'append')
+                d.to_sql(
+                    os.path.splitext(tab)[0].split('__')[1],
+                    dest_conn,
+                    index=False,
+                    if_exists='append',
+                )
