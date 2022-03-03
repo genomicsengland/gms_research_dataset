@@ -230,6 +230,12 @@ create table release (
     release_date date
 );
 
+-- create table to hold referral IDs of closed cases
+create table closed_referral (
+    referral_id varchar,
+    primary key (referral_id)
+);
+
 -- function for ID obfuscation
 create function obfuscate_id (
     orig_id varchar, -- the ID to be obfuscated
@@ -293,6 +299,12 @@ with in_valid_referral as (
     join referral r on rp.referral_id = r.referral_id
     where r.status in ('active', 'completed')
 ),
+in_closed_case as (
+    -- get patients associated with a closed referral
+    select distinct rp.patient_id
+    from referral_participant rp
+    join closed_referral cr on rp.referral_id = cr.referral_id
+),
 agreed_to_research as (
     -- get those who answered yes to R2 consent question when most recently asked
     select p.patient_id
@@ -313,7 +325,8 @@ under_sixteen_at_consent as (
     -- get patients who were under sixteen at consent
     select p.patient_id
     from patient p
-    join consent c on c.patient_uid = p.uid
+    join (select patient_uid, consent_date from consent where recency = 1) c
+        on c.patient_uid = p.uid
     where extract('year' from age(c.consent_date, p.patient_date_of_birth)) < 16
 ),
 under_sixteen_at_release as (
@@ -331,6 +344,7 @@ deceased as (
 )
 select p.patient_id
     ,ivr.patient_id is not null as in_valid_referral
+    ,icc.patient_id is not null as in_closed_case
     ,a2r.patient_id is not null as agreed_to_research
     ,occ.patient_id is not null as on_child_consent
     ,usac.patient_id is not null as under_sixteen_at_consent
@@ -338,6 +352,7 @@ select p.patient_id
     ,dec.patient_id is not null as deceased
     -- patient is eligible if:
     ,ivr.patient_id is not null and               -- they are in a valid referral AND
+    icc.patient_id is not null and                -- they are in a closed case AND
     a2r.patient_id is not null and                -- they agreed to research AND
     (occ.patient_id is null or                    -- (they are not on child consent OR
         (occ.patient_id is not null and           --    (they are on child consent AND
@@ -348,6 +363,7 @@ select p.patient_id
     ) as eligible                                 -- )
 from patient p
 left join in_valid_referral ivr on ivr.patient_id = p.patient_id
+left join in_closed_case icc on icc.patient_id = p.patient_id
 left join agreed_to_research a2r on a2r.patient_id = p.patient_id
 left join on_child_consent occ on occ.patient_id = p.patient_id
 left join under_sixteen_at_consent usac on usac.patient_id = p.patient_id
@@ -364,6 +380,8 @@ select distinct rp.referral_id
 from referral_participant rp
 join vw_eligible_patient ep
 on rp.patient_id = ep.patient_id
+join closed_referral cr
+on rp.referral_id = cr.referral_id
 ;
 create view vw_condition as
 select obfuscate_id(c.patient_id, 'p', 'pp') as patient_id
@@ -418,6 +436,7 @@ select obfuscate_id(rp.patient_id, 'p', 'pp') as patient_id
     ,rp.relationship_to_proband
 from referral_participant rp
 join vw_eligible_patient ep on rp.patient_id = ep.patient_id
+join vw_eligible_referral er on rp.patient_id = er.referral_id
 ;
 create view vw_referral as
 select obfuscate_id(r.referral_id, 'r', 'rr') as referral_id
@@ -478,6 +497,7 @@ left join dedup_sample s
         (ls.primary_sample_id_glh_lims is not null and s.sample_id_glh is not null and ls.primary_sample_id_glh_lims = s.sample_id_glh)
     )
 join vw_eligible_patient ep on ls.patient_id = ep.patient_id
+join vw_eligible_referral er on ls.referral_id = er.referral_id
 ;
 create view vw_plated_sample as
 select obfuscate_id(p.gel1001_id::varchar, '', 'ss') as sample_id
