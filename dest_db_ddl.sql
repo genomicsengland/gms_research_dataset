@@ -436,7 +436,7 @@ select obfuscate_id(rp.patient_id, 'p', 'pp') as patient_id
     ,rp.relationship_to_proband
 from referral_participant rp
 join vw_eligible_patient ep on rp.patient_id = ep.patient_id
-join vw_eligible_referral er on rp.patient_id = er.referral_id
+join vw_eligible_referral er on rp.referral_id = er.referral_id
 ;
 create view vw_referral as
 select obfuscate_id(r.referral_id, 'r', 'rr') as referral_id
