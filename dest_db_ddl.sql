@@ -343,6 +343,7 @@ deceased as (
     where p.life_status != 'alive'
 )
 select p.patient_id
+    ,obfuscate_id(p.patient_id, 'p', 'pp') as obfuscated_patient_id
     ,ivr.patient_id is not null as in_valid_referral
     ,icc.patient_id is not null as in_closed_case
     ,a2r.patient_id is not null as agreed_to_research
