@@ -313,6 +313,14 @@ agreed_to_research as (
         on c.patient_uid = p.uid
     where c.research_answer_given ilike 'yes'
 ),
+withdrawn as (
+    -- get those who have withdrawn
+    select p.patient_id
+    from patient p
+    join (select patient_uid, research_answer_given from consent where recency = 1) c
+        on c.patient_uid = p.uid
+    where c.research_answer_given ilike 'full withdrawal'
+),
 on_child_consent as (
     -- get those who have most recently consented as child
     select p.patient_id
@@ -347,6 +355,7 @@ select p.patient_id
     ,ivr.patient_id is not null as in_valid_referral
     ,icc.patient_id is not null as in_closed_case
     ,a2r.patient_id is not null as agreed_to_research
+    ,wdr.patient_id is not null as withdrawn
     ,occ.patient_id is not null as on_child_consent
     ,usac.patient_id is not null as under_sixteen_at_consent
     ,usar.patient_id is not null as under_sixteen_at_release
@@ -366,6 +375,7 @@ from patient p
 left join in_valid_referral ivr on ivr.patient_id = p.patient_id
 left join in_closed_case icc on icc.patient_id = p.patient_id
 left join agreed_to_research a2r on a2r.patient_id = p.patient_id
+left join withdrawn wdr on wdr.patient_id = p.patient_id
 left join on_child_consent occ on occ.patient_id = p.patient_id
 left join under_sixteen_at_consent usac on usac.patient_id = p.patient_id
 left join under_sixteen_at_release usar on usar.patient_id = p.patient_id
