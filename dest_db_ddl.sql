@@ -383,11 +383,13 @@ left join deceased dec on dec.patient_id = p.patient_id
 ;
 create view vw_eligible_patient as
 select pl.patient_id
+    ,pl.obfuscated_patient_id
 from vw_patient_list pl
 where pl.eligible = true
 ;
 create view vw_eligible_referral as
 select distinct rp.referral_id
+    ,obfuscate_id(rp.referral_id, 'r', 'rr') as obfuscated_referral_id
 from referral_participant rp
 join vw_eligible_patient ep
 on rp.patient_id = ep.patient_id
@@ -395,7 +397,7 @@ join closed_referral cr
 on rp.referral_id = cr.referral_id
 ;
 create view vw_condition as
-select obfuscate_id(c.patient_id, 'p', 'pp') as patient_id
+select ep.obfuscated_patient_id as patient_id
     ,c.uid
     ,c.certainty
     ,c.code
@@ -404,7 +406,7 @@ from condition c
 join vw_eligible_patient ep on c.patient_id = ep.patient_id
 ;
 create view vw_observation as
-select obfuscate_id(o.patient_id, 'p', 'pp') as patient_id
+select ep.obfuscated_patient_id as patient_id
     ,o.uid
     ,o.observation_effective_from
     ,o.code
@@ -423,7 +425,7 @@ from observation_component oc
 join vw_observation o on o.uid = oc.observation_uid
 ;
 create view vw_patient as
-select obfuscate_id(p.patient_id, 'p', 'pp') as patient_id
+select ep.obfuscated_patient_id as patient_id
     ,p.uid
     ,extract('year' from p.patient_date_of_birth) as patient_year_of_birth
     ,p.patient_year_of_death
@@ -438,8 +440,8 @@ from patient p
 join vw_eligible_patient ep on p.patient_id = ep.patient_id
 ;
 create view vw_referral_participant as
-select obfuscate_id(rp.patient_id, 'p', 'pp') as patient_id
-    ,obfuscate_id(rp.referral_id, 'r', 'rr') as referral_id
+select ep.obfuscated_patient_id as patient_id
+    ,er.obfuscated_referral_id as referral_id
     ,rp.uid
     ,rp.referral_participant_is_proband
     ,rp.disease_status
@@ -450,7 +452,7 @@ join vw_eligible_patient ep on rp.patient_id = ep.patient_id
 join vw_eligible_referral er on rp.referral_id = er.referral_id
 ;
 create view vw_referral as
-select obfuscate_id(r.referral_id, 'r', 'rr') as referral_id
+select er.obfuscated_referral_id as referral_id
     ,r.uid
     ,r.status
     ,r.priority
@@ -467,7 +469,7 @@ left join ordering_entity oe
 join vw_eligible_referral er on r.referral_id = er.referral_id
 ;
 create view vw_referral_test as
-select obfuscate_id(rt.referral_id, 'r', 'rr') as referral_id
+select er.obfuscated_referral_id as referral_id
     ,rt.uid
     ,rt.referral_test_expected_number_of_patients
 from referral_test rt
@@ -486,8 +488,8 @@ with dedup_sample as (
     join referral_sample rs on rs.sample_uid = s.uid
 )
 select obfuscate_id(ls.gel1001_id::varchar, '', 'ss') as sample_id
-    ,obfuscate_id(ls.patient_id, 'p', 'pp') as patient_id
-    ,obfuscate_id(ls.referral_id, 'r', 'rr') as referral_id
+    ,ep.obfuscated_patient_id as patient_id
+    ,er.obfuscated_referral_id as referral_id
     ,ls.type
     ,ls.state
     ,ls.collection_date
@@ -522,7 +524,7 @@ left join plated_sample_qc qc
 join vw_sample s on obfuscate_id(p.gel1001_id::varchar, '', 'ss') = s.sample_id
 ;
 create view vw_tumour as
-select obfuscate_id(t.patient_id, 'p', 'pp') as patient_id
+select ep.obfuscated_patient_id as patient_id
     ,t.uid
     ,t.tumour_type
     ,t.presentation
