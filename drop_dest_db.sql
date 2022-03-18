@@ -17,15 +17,15 @@ drop view vw_tumour_morphology cascade;
 drop view vw_tumour_topography cascade;
 
 -- drop functions
-drop function obfuscate_id;
-drop function reverse_obfuscate_id;
+drop function encrypt_id;
+drop function decrypt_id;
 
 -- drop tables
 drop table clinical_indication cascade;
 drop table condition cascade;
 drop table consent cascade;
 drop table laboratory_sample cascade;
-drop table obfuscation_seed cascade;
+drop table encryption_seed cascade;
 drop table observation cascade;
 drop table observation_component cascade;
 drop table ordering_entity cascade;

@@ -216,12 +216,12 @@ create table consent (
 );
 comment on table consent is 'Reference table for consent data used for generation of participant list';
 
--- generate random seed number for ID obfuscation
+-- generate random seed number for ID encryption
 -- patient and referral IDs are 11 digits long, so make seed that long also
-create table obfuscation_seed (
+create table encryption_seed (
     seed bigint
 );
-insert into obfuscation_seed (seed)
+insert into encryption_seed (seed)
 select floor(random() * (99999999999 - 10000000000 + 1) + 10000000000);
 
 -- create table to hold release date
@@ -236,22 +236,22 @@ create table closed_referral (
     primary key (referral_id)
 );
 
--- function for ID obfuscation
-create function obfuscate_id (
-    orig_id varchar, -- the ID to be obfuscated
+-- function for ID encryption
+create function encrypt_id (
+    orig_id varchar, -- the ID to be encrypted
     orig_prefix varchar, -- the prefix that is used for that type of ID
-    return_prefix varchar -- the prefix for the returned, obfuscated ID
+    return_prefix varchar -- the prefix for the returned, encrypted ID
 )
     returns varchar as
 $$
 declare
-    s obfuscation_seed.seed%type; -- copy type from the seed
+    s encryption_seed.seed%type; -- copy type from the seed
 begin
     -- get seed into function variable
     select seed
-    from obfuscation_seed
+    from encryption_seed
     into s;
-    -- obfuscate the ID:
+    -- encrypt the ID:
     -- remove the prefix, then reverse the number and do xor with the seed
     -- convert back to bigint and add new prefix
     return return_prefix || (
@@ -263,21 +263,21 @@ begin
 end;
 $$
 language plpgsql;
-create function reverse_obfuscate_id (
-    orig_id varchar, -- the ID to be reverse_obfuscated
-    orig_prefix varchar, -- the prefix that is used for that type of ID
-    return_prefix varchar -- the prefix for the returned, obfuscated ID
+create function decrypt_id (
+    orig_id varchar, -- the ID to be decrypted
+    orig_prefix varchar, -- the prefix that is used for that type of encrypted ID
+    return_prefix varchar -- the prefix for the returned, decrypted ID
 )
     returns varchar as
 $$
 declare
-    s obfuscation_seed.seed%type; -- copy type from the seed
+    s encryption_seed.seed%type; -- copy type from the seed
 begin
     -- get seed into function variable
     select seed
-    from obfuscation_seed
+    from encryption_seed
     into s;
-    -- reverse obfuscate the ID:
+    -- decrypt the ID:
     -- remove the prefix, do xor with the seed
     -- convert back to bigint then varchar, reverse it and add new prefix
     return return_prefix ||
@@ -351,7 +351,7 @@ deceased as (
     where p.life_status != 'alive'
 )
 select p.patient_id
-    ,obfuscate_id(p.patient_id, 'p', 'pp') as obfuscated_patient_id
+    ,encrypt_id(p.patient_id, 'p', 'pp') as encrypted_patient_id
     ,ivr.patient_id is not null as in_valid_referral
     ,icc.patient_id is not null as in_closed_case
     ,a2r.patient_id is not null as agreed_to_research
@@ -383,13 +383,13 @@ left join deceased dec on dec.patient_id = p.patient_id
 ;
 create view vw_eligible_patient as
 select pl.patient_id
-    ,pl.obfuscated_patient_id
+    ,pl.encrypted_patient_id
 from vw_patient_list pl
 where pl.eligible = true
 ;
 create view vw_eligible_referral as
 select distinct rp.referral_id
-    ,obfuscate_id(rp.referral_id, 'r', 'rr') as obfuscated_referral_id
+    ,encrypt_id(rp.referral_id, 'r', 'rr') as encrypted_referral_id
 from referral_participant rp
 join vw_eligible_patient ep
 on rp.patient_id = ep.patient_id
@@ -397,7 +397,7 @@ join closed_referral cr
 on rp.referral_id = cr.referral_id
 ;
 create view vw_condition as
-select ep.obfuscated_patient_id as patient_id
+select ep.encrypted_patient_id as patient_id
     ,c.uid
     ,c.certainty
     ,c.code
@@ -406,7 +406,7 @@ from condition c
 join vw_eligible_patient ep on c.patient_id = ep.patient_id
 ;
 create view vw_observation as
-select ep.obfuscated_patient_id as patient_id
+select ep.encrypted_patient_id as patient_id
     ,o.uid
     ,o.observation_effective_from
     ,o.code
@@ -425,7 +425,7 @@ from observation_component oc
 join vw_observation o on o.uid = oc.observation_uid
 ;
 create view vw_patient as
-select ep.obfuscated_patient_id as patient_id
+select ep.encrypted_patient_id as patient_id
     ,p.uid
     ,extract('year' from p.patient_date_of_birth) as patient_year_of_birth
     ,p.patient_year_of_death
@@ -440,8 +440,8 @@ from patient p
 join vw_eligible_patient ep on p.patient_id = ep.patient_id
 ;
 create view vw_referral_participant as
-select ep.obfuscated_patient_id as patient_id
-    ,er.obfuscated_referral_id as referral_id
+select ep.encrypted_patient_id as patient_id
+    ,er.encrypted_referral_id as referral_id
     ,rp.uid
     ,rp.referral_participant_is_proband
     ,rp.disease_status
@@ -452,7 +452,7 @@ join vw_eligible_patient ep on rp.patient_id = ep.patient_id
 join vw_eligible_referral er on rp.referral_id = er.referral_id
 ;
 create view vw_referral as
-select er.obfuscated_referral_id as referral_id
+select er.encrypted_referral_id as referral_id
     ,r.uid
     ,r.status
     ,r.priority
@@ -469,7 +469,7 @@ left join ordering_entity oe
 join vw_eligible_referral er on r.referral_id = er.referral_id
 ;
 create view vw_referral_test as
-select er.obfuscated_referral_id as referral_id
+select er.encrypted_referral_id as referral_id
     ,rt.uid
     ,rt.referral_test_expected_number_of_patients
 from referral_test rt
@@ -487,9 +487,9 @@ with dedup_sample as (
     from sample s
     join referral_sample rs on rs.sample_uid = s.uid
 )
-select obfuscate_id(ls.gel1001_id::varchar, '', 'ss') as sample_id
-    ,ep.obfuscated_patient_id as patient_id
-    ,er.obfuscated_referral_id as referral_id
+select encrypt_id(ls.gel1001_id::varchar, '', 'ss') as sample_id
+    ,ep.encrypted_patient_id as patient_id
+    ,er.encrypted_referral_id as referral_id
     ,ls.type
     ,ls.state
     ,ls.collection_date
@@ -513,7 +513,7 @@ join vw_eligible_patient ep on ls.patient_id = ep.patient_id
 join vw_eligible_referral er on ls.referral_id = er.referral_id
 ;
 create view vw_plated_sample as
-select obfuscate_id(p.gel1001_id::varchar, '', 'ss') as sample_id
+select encrypt_id(p.gel1001_id::varchar, '', 'ss') as sample_id
     ,p.platekey
     ,qc.illumina_qc_status
     ,qc.illumina_sample_concentration
@@ -521,10 +521,10 @@ select obfuscate_id(p.gel1001_id::varchar, '', 'ss') as sample_id
 from plated_sample p
 left join plated_sample_qc qc
     on p.platekey = qc.platekey
-join vw_sample s on obfuscate_id(p.gel1001_id::varchar, '', 'ss') = s.sample_id
+join vw_sample s on encrypt_id(p.gel1001_id::varchar, '', 'ss') = s.sample_id
 ;
 create view vw_tumour as
-select ep.obfuscated_patient_id as patient_id
+select ep.encrypted_patient_id as patient_id
     ,t.uid
     ,t.tumour_type
     ,t.presentation
