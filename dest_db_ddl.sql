@@ -422,17 +422,17 @@ select
     and agreed_to_research.patient_id is not null
     -- (they are not on child consent OR
     and (on_child_consent.patient_id is null
-        --    (they are on child consent AND
+        -- (they are on child consent AND
         or (on_child_consent.patient_id is not null
-            --       (they were over 16 at consent OR
+            -- (they were over 16 at consent OR
             and (under_sixteen_at_consent.patient_id is null
-                --          (they are under sixteen at consent AND
+                -- (they are under sixteen at consent AND
                 or (under_sixteen_at_consent.patient_id is not null
-                    --           they are under sixteen at release) OR
+                    -- they are under sixteen at release) OR
                     and under_sixteen_at_release.patient_id is not null)
-                --        they are deceased))
+                -- they are deceased))
                 or deceased.patient_id is not null))
-    ) as eligible                                 -- )
+    ) as eligible -- )
 from patient
 left join in_valid_referral on in_valid_referral.patient_id = patient.patient_id
 left join in_closed_case on in_closed_case.patient_id = patient.patient_id
@@ -447,12 +447,14 @@ left join
     under_sixteen_at_release on
         under_sixteen_at_release.patient_id = patient.patient_id
 left join deceased on deceased.patient_id = patient.patient_id;
+
 create view vw_eligible_patient as
 select
     vw_patient_list.patient_id,
     vw_patient_list.encrypted_patient_id
 from vw_patient_list
 where vw_patient_list.eligible = true;
+
 create view vw_eligible_referral as
 select distinct
     referral_participant.referral_id,
@@ -464,6 +466,7 @@ inner join vw_eligible_patient
     on referral_participant.patient_id = vw_eligible_patient.patient_id
 inner join closed_referral
     on referral_participant.referral_id = closed_referral.referral_id;
+
 create view vw_condition as
 select
     vw_eligible_patient.encrypted_patient_id as patient_id,
@@ -474,6 +477,7 @@ select
 from condition
 inner join vw_eligible_patient
     on condition.patient_id = vw_eligible_patient.patient_id;
+
 create view vw_observation as
 select
     vw_eligible_patient.encrypted_patient_id as patient_id,
@@ -485,8 +489,10 @@ select
 from observation
 inner join vw_eligible_patient
     on observation.patient_id = vw_eligible_patient.patient_id;
+
 create view vw_observation_component as
 select
+    vw_observation.patient_id,
     observation_component.uid,
     observation_component.observation_uid,
     observation_component.observation_component_code,
@@ -495,6 +501,7 @@ select
 from observation_component
 inner join vw_observation
     on vw_observation.uid = observation_component.observation_uid;
+
 create view vw_patient as
 select
     vw_eligible_patient.encrypted_patient_id as patient_id,
@@ -511,6 +518,7 @@ select
 from patient
 inner join
     vw_eligible_patient on patient.patient_id = vw_eligible_patient.patient_id;
+
 create view vw_referral_participant as
 select
     vw_eligible_patient.encrypted_patient_id as patient_id,
@@ -526,6 +534,7 @@ inner join
         referral_participant.patient_id = vw_eligible_patient.patient_id
 inner join vw_eligible_referral
     on referral_participant.referral_id = vw_eligible_referral.referral_id;
+
 create view vw_referral as
 select
     vw_eligible_referral.encrypted_referral_id as referral_id,
@@ -544,6 +553,7 @@ left join ordering_entity
     on referral.ordering_entity_uid = ordering_entity.uid
 inner join vw_eligible_referral
     on referral.referral_id = vw_eligible_referral.referral_id;
+
 create view vw_referral_test as
 select
     vw_eligible_referral.encrypted_referral_id as referral_id,
@@ -552,6 +562,7 @@ select
 from referral_test
 inner join vw_eligible_referral
     on referral_test.referral_id = vw_eligible_referral.referral_id;
+
 create view vw_sample as
 with dedup_sample as (
     select distinct
@@ -603,8 +614,10 @@ inner join vw_eligible_patient
     on laboratory_sample.patient_id = vw_eligible_patient.patient_id
 inner join vw_eligible_referral
     on laboratory_sample.referral_id = vw_eligible_referral.referral_id;
+
 create view vw_plated_sample as
 select
+    vw_sample.patient_id,
     plated_sample.platekey,
     plated_sample_qc.illumina_qc_status,
     plated_sample_qc.illumina_sample_concentration,
@@ -617,6 +630,7 @@ inner join vw_sample
     on encrypt_id(
         plated_sample.gel1001_id::varchar, '', 'ss'
     ) = vw_sample.sample_id;
+
 create view vw_tumour as
 select
     vw_eligible_patient.encrypted_patient_id as patient_id,
@@ -629,15 +643,19 @@ select
 from tumour
 inner join
     vw_eligible_patient on tumour.patient_id = vw_eligible_patient.patient_id;
+
 create view vw_tumour_morphology as
 select
+    vw_tumour.patient_id,
     tumour_morphology.uid,
     tumour_morphology.tumour_uid,
     tumour_morphology.morphology
 from tumour_morphology
 inner join vw_tumour on vw_tumour.uid = tumour_morphology.tumour_uid;
+
 create view vw_tumour_topography as
 select
+    vw_tumour.patient_id,
     tumour_topography.uid,
     tumour_topography.tumour_uid,
     tumour_topography.actual_body_site,
