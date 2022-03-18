@@ -32,3 +32,7 @@ repos:
     rev: 3.9.2
     hooks:
     - id: flake8
+-   repo: https://github.com/sqlfluff/sqlfluff
+    rev: 0.11.1
+    hooks:
+    - id: sqlfluff-lint
