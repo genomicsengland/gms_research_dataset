@@ -1,7 +1,8 @@
 select
-    tm.uid
-    ,tm.tumour_uid
-    ,tumour_morphology_concept.concept_code as morphology
-from public.tumour_morphology tm
-left join public.concept tumour_morphology_concept on tumour_morphology_concept.uid = tm.morphology_cid
-;
+    public.tumour_morphology.uid,
+    public.tumour_morphology.tumour_uid,
+    public.concept.concept_code as morphology
+from public.tumour_morphology
+left join
+    public.concept
+    on public.concept.uid = public.tumour_morphology.morphology_cid;
