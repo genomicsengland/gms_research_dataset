@@ -160,6 +160,7 @@ create table tumour_morphology (
     uid uuid,
     tumour_uid uuid,
     morphology varchar,
+    morphology_description varchar,
     primary key (uid),
     foreign key (tumour_uid) references tumour (uid)
 );
@@ -649,7 +650,8 @@ select
     vw_tumour.patient_id,
     tumour_morphology.uid,
     tumour_morphology.tumour_uid,
-    tumour_morphology.morphology
+    tumour_morphology.morphology,
+    tumour_morphology.morphology_description
 from tumour_morphology
 inner join vw_tumour on vw_tumour.uid = tumour_morphology.tumour_uid;
 
