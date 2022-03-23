@@ -8,6 +8,7 @@ output_fldr_ref=$output_fldr/reference
 
 echo -e "Exporting to: $output_fldr"
 
+rm -r $output_fldr
 mkdir -p $output_fldr
 mkdir $output_fldr_ref
 
