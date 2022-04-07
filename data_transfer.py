@@ -63,6 +63,33 @@ def list_sql_scripts(loc):
     return out
 
 
+def load_df_to_db(tab, conn, df):
+    """
+    load pandas dataframe into a database connection
+    :param tab: name of destination table
+    :param conn: target database connection
+    :param df: pandas dataframe to be loaded
+    """
+
+    df.to_sql(
+        tab,
+        conn,
+        index=False,
+        if_exists='append',
+    )
+
+
+def read_sql_to_df(sql, conn):
+    """
+    read sql into pandas df
+    :param sql: sql query
+    :param conn: target database connection
+    :returns: pandas df
+    """
+
+    return pd.read_sql(sql, conn)
+
+
 if __name__ == '__main__':
 
     scripts = list_sql_scripts(sql_script_location)
@@ -79,11 +106,6 @@ if __name__ == '__main__':
 
                 s = f.read()
 
-                d = pd.read_sql(s, conn)
+                d = read_sql_to_df(s, conn)
 
-                d.to_sql(
-                    os.path.splitext(tab)[0].split('__')[1],
-                    dest_conn,
-                    index=False,
-                    if_exists='append',
-                )
+                load_df_to_db(os.path.splitext(tab)[0].split('__')[1], dest_conn, d)
