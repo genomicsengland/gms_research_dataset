@@ -5,7 +5,7 @@ from test import data_for_testing
 import data_transfer
 
 
-class TestParticipantListFlags(unittest.TestCase):
+class TestPatientListFlags(unittest.TestCase):
     def setUp(self):
         """
         build the intermediate database and load up the test patient data
