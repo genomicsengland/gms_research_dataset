@@ -135,16 +135,16 @@ class TestPatientListFlags(unittest.TestCase):
                 con,
             )
 
-            self.assertFalse(d.in_closed_case[0])
+            self.assertTrue(d.in_closed_case[0])
 
-            con.execute("insert into closed_referral (referral_id) values ('r001');")
+            con.execute("delete from closed_referral where referral_id ='r001';")
 
             d = data_transfer.read_sql_to_df(
                 "select in_closed_case from vw_patient_list where patient_id = 'p001';",
                 con,
             )
 
-            self.assertTrue(d.in_closed_case[0])
+            self.assertFalse(d.in_closed_case[0])
 
     def test_agreed_to_research_flag(self):
 
