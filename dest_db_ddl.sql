@@ -443,14 +443,12 @@ select
     and (on_child_consent.patient_id is null
         -- (they are on child consent AND
         or (on_child_consent.patient_id is not null
-            -- (they were over 16 at consent OR
-            and (under_sixteen_at_consent.patient_id is null
-                -- (they are under sixteen at consent AND
-                or (under_sixteen_at_consent.patient_id is not null
-                    -- they are under sixteen at release) OR
-                    and under_sixteen_at_release.patient_id is not null)
+            -- they were under 16 at consent AND
+            and under_sixteen_at_consent.patient_id is not null
+                -- (they are under sixteen at release OR
+            and (under_sixteen_at_release.patient_id is not null
                 -- they are deceased))
-                or deceased.patient_id is not null))
+                 or deceased.patient_id is not null))
     ) as eligible -- )
 from patient
 left join in_valid_referral on in_valid_referral.patient_id = patient.patient_id

@@ -58,7 +58,7 @@ test_scenarios = {
                 "where patient_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
             ),
         ],
-        'eligible': True,
+        'eligible': False,
     },
     'on_child_consent_under_16_at_consent_deceased': {
         'sql': [
@@ -97,7 +97,7 @@ test_scenarios = {
                 "where patient_id = 'p001';"
             ),
         ],
-        'eligible': True,
+        'eligible': False,
     },
     'on_child_consent_under_16_at_consent_under_16_at_release': {
         'sql': [
@@ -142,6 +142,24 @@ test_scenarios = {
                 "where patient_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
             ),
             "update release set release_date = '2016-01-02';",
+        ],
+        'eligible': False,
+    },
+    'on_child_consent_under_16_at_consent_over_16_at_release_deceased': {
+        'sql': [
+            (
+                "update consent set consent_category = 'Child' "
+                "where patient_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
+            ),
+            (
+                "update patient set patient_date_of_birth = '2000-01-01' "
+                "where patient_id = 'p001';"
+            ),
+            "update release set release_date = '2016-01-02';",
+            (
+                "update patient set life_status = 'deceased' "
+                "where patient_id = 'p001';"
+            ),
         ],
         'eligible': True,
     },
