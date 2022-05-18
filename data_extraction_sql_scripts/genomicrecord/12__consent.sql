@@ -17,6 +17,7 @@ with consent_questions as ( -- noqa: L042
 select
     consent.uid as consent_uid,
     consent.patient_uid,
+    cq_disc.answer_given as discussion_answer_given,
     cq_res.answer_given as research_answer_given,
     cq_cat.answer_given as consent_category,
     consent_questionnaire_response.consent_questionnaire_response_authored
@@ -30,6 +31,10 @@ from consent
 inner join
     consent_questionnaire_response on
         consent_questionnaire_response.consent_uid = consent.uid
+left join
+    (
+        select * from consent_questions where question_id = 'R1'
+    ) as cq_disc on cq_disc.consent_uid = consent.uid
 left join
     (
         select * from consent_questions where question_id = 'R2'

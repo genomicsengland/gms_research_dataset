@@ -19,6 +19,15 @@ test_scenarios = {
         'sql': ["delete from closed_referral where referral_id = 'r001';"],
         'eligible': False,
     },
+    'did_not_discuss_research': {
+        'sql': [
+            (
+                "update consent set discussion_answer_given = 'no' "
+                "where patient_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
+            )
+        ],
+        'eligible': False,
+    },
     'did_not_agree_to_research': {
         'sql': [
             (

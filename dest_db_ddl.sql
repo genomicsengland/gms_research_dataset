@@ -225,6 +225,7 @@ comment on table plated_sample_qc is
 create table consent (
     consent_uid uuid,
     patient_uid uuid,
+    discussion_answer_given varchar,
     research_answer_given varchar,
     consent_category varchar,
     consent_date timestamp,
@@ -330,6 +331,20 @@ in_closed_case as (
             referral_participant.referral_id = closed_referral.referral_id
 ),
 
+discussed_research as (
+    -- get those who answered yes to R1 consent question when most recently
+    -- asked
+    select patient.patient_id
+    from patient
+    inner join
+        (select
+            patient_uid,
+            discussion_answer_given
+            from consent where recency = 1) as c
+        on c.patient_uid = patient.uid
+    where c.discussion_answer_given ilike 'yes'
+),
+
 agreed_to_research as (
     -- get those who answered yes to R2 consent question when most recently
     -- asked
@@ -408,6 +423,7 @@ select
     encrypt_id(patient.patient_id, 'p', 'pp') as encrypted_patient_id,
     in_valid_referral.patient_id is not null as in_valid_referral,
     in_closed_case.patient_id is not null as in_closed_case,
+    discussed_research.patient_id is not null as discussed_research,
     agreed_to_research.patient_id is not null as agreed_to_research,
     withdrawn.patient_id is not null as withdrawn,
     on_child_consent.patient_id is not null as on_child_consent,
@@ -419,6 +435,8 @@ select
     in_valid_referral.patient_id is not null
     -- they are in a closed case AND
     and in_closed_case.patient_id is not null
+    -- they discussed research AND
+    and discussed_research.patient_id is not null
     -- they agreed to research AND
     and agreed_to_research.patient_id is not null
     -- (they are not on child consent OR
@@ -437,6 +455,8 @@ select
 from patient
 left join in_valid_referral on in_valid_referral.patient_id = patient.patient_id
 left join in_closed_case on in_closed_case.patient_id = patient.patient_id
+left join
+    discussed_research on discussed_research.patient_id = patient.patient_id
 left join
     agreed_to_research on agreed_to_research.patient_id = patient.patient_id
 left join withdrawn on withdrawn.patient_id = patient.patient_id

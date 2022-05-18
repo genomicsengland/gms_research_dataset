@@ -11,6 +11,7 @@ d = {
         'consent_uid': 'be5e91a4-63de-49b4-b16d-d78368702369',
         'patient_uid': '92943acf-12f4-4c9b-8bb2-068b81a1d3b7',
         'research_answer_given': 'yes',
+        'discussion_answer_given': 'yes',
         'consent_category': 'Adult',
         'consent_date': '2000-01-01',
         'recency': 1,

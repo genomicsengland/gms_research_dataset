@@ -172,6 +172,32 @@ class TestPatientListFlags(unittest.TestCase):
 
                     self.assertEqual(d.agreed_to_research[0], val)
 
+    def test_discussed_research_flag(self):
+
+        discussion_answer_to_agreed = {
+            'yes': True,
+            'no': False,
+            None: False,
+        }
+
+        for ans, val in discussion_answer_to_agreed.items():
+
+            with data_transfer.get_dest_connection() as con:
+
+                con.execute(
+                    f"update consent set discussion_answer_given = '{ans}' "
+                    "where patient_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
+                )
+
+                d = data_transfer.read_sql_to_df(
+                    "select discussed_research from vw_patient_list where patient_id = 'p001';",
+                    con,
+                )
+
+                with self.subTest(f'Testing {ans}'):
+
+                    self.assertEqual(d.discussed_research[0], val)
+
     def test_on_child_consent_flag(self):
 
         consent_category_to_child_consent = {
