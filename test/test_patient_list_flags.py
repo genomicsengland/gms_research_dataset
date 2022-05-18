@@ -146,6 +146,26 @@ class TestPatientListFlags(unittest.TestCase):
 
             self.assertFalse(d.in_closed_case[0])
 
+    def test_whitelisted_patient_flag(self):
+
+        with data_transfer.get_dest_connection() as con:
+
+            d = data_transfer.read_sql_to_df(
+                "select whitelisted from vw_patient_list where patient_id = 'p001';",
+                con,
+            )
+
+            self.assertTrue(d.whitelisted[0])
+
+            con.execute("delete from whitelisted_patient where patient_id ='p001';")
+
+            d = data_transfer.read_sql_to_df(
+                "select whitelisted from vw_patient_list where patient_id = 'p001';",
+                con,
+            )
+
+            self.assertFalse(d.whitelisted[0])
+
     def test_agreed_to_research_flag(self):
 
         research_answer_to_agreed = {

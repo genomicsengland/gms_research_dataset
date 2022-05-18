@@ -42,3 +42,4 @@ drop table plated_sample cascade;
 drop table plated_sample_qc cascade;
 drop table release cascade;
 drop table closed_referral cascade;
+drop table whitelisted_patient cascade;

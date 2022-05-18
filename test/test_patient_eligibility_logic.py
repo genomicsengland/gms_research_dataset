@@ -19,6 +19,10 @@ test_scenarios = {
         'sql': ["delete from closed_referral where referral_id = 'r001';"],
         'eligible': False,
     },
+    'not_whitelisted': {
+        'sql': ["delete from whitelisted_patient where patient_id = 'p001';"],
+        'eligible': False,
+    },
     'did_not_discuss_research': {
         'sql': [
             (

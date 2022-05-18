@@ -29,6 +29,9 @@ d = {
     'closed_referral': {
         'referral_id': 'r001',
     },
+    'whitelisted_patient': {
+        'patient_id': 'p001',
+    },
 }
 
 

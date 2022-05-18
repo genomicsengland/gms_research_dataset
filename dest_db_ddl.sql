@@ -253,7 +253,15 @@ create table release (
 -- create table to hold referral IDs of closed cases
 create table closed_referral (
     referral_id varchar,
-    primary key (referral_id)
+    primary key (referral_id),
+    foreign key (referral_id) references referral (referral_id)
+);
+
+-- create table for whitelisted patients (shortlist for eligible patients)
+create table whitelisted_patient (
+    patient_id varchar,
+    primary key (patient_id),
+    foreign key (patient_id) references patient (patient_id)
 );
 
 -- function for ID encryption
@@ -329,6 +337,12 @@ in_closed_case as (
     inner join
         closed_referral on
             referral_participant.referral_id = closed_referral.referral_id
+),
+
+whitelisted_patient as (
+    -- get all the whitelisted patients
+    select distinct whitelisted_patient.patient_id
+    from whitelisted_patient
 ),
 
 discussed_research as (
@@ -423,6 +437,7 @@ select
     encrypt_id(patient.patient_id, 'p', 'pp') as encrypted_patient_id,
     in_valid_referral.patient_id is not null as in_valid_referral,
     in_closed_case.patient_id is not null as in_closed_case,
+    whitelisted_patient.patient_id is not null as whitelisted,
     discussed_research.patient_id is not null as discussed_research,
     agreed_to_research.patient_id is not null as agreed_to_research,
     withdrawn.patient_id is not null as withdrawn,
@@ -435,6 +450,8 @@ select
     in_valid_referral.patient_id is not null
     -- they are in a closed case AND
     and in_closed_case.patient_id is not null
+    -- they are a whitelisted patient AND
+    and whitelisted_patient.patient_id is not null
     -- they discussed research AND
     and discussed_research.patient_id is not null
     -- they agreed to research AND
@@ -453,6 +470,8 @@ select
 from patient
 left join in_valid_referral on in_valid_referral.patient_id = patient.patient_id
 left join in_closed_case on in_closed_case.patient_id = patient.patient_id
+left join
+    whitelisted_patient on whitelisted_patient.patient_id = patient.patient_id
 left join
     discussed_research on discussed_research.patient_id = patient.patient_id
 left join
