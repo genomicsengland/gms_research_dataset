@@ -259,9 +259,9 @@ create table closed_referral (
 
 -- create table for whitelisted patients (shortlist for eligible patients)
 create table whitelisted_patient (
-    patient_id varchar,
-    primary key (patient_id),
-    foreign key (patient_id) references patient (patient_id)
+    patient_uid uuid,
+    primary key (patient_uid),
+    foreign key (patient_uid) references patient (uid)
 );
 
 -- function for ID encryption
@@ -341,8 +341,9 @@ in_closed_case as (
 
 whitelisted_patient as (
     -- get all the whitelisted patients
-    select distinct whitelisted_patient.patient_id
+    select distinct patient.patient_id
     from whitelisted_patient
+    inner join patient on patient.uid = whitelisted_patient.patient_uid
 ),
 
 discussed_research as (
