@@ -157,7 +157,9 @@ class TestPatientListFlags(unittest.TestCase):
 
             self.assertTrue(d.whitelisted[0])
 
-            con.execute("delete from whitelisted_patient where patient_id ='p001';")
+            con.execute(
+                "delete from whitelisted_patient where patient_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
+            )
 
             d = data_transfer.read_sql_to_df(
                 "select whitelisted from vw_patient_list where patient_id = 'p001';",

@@ -20,7 +20,9 @@ test_scenarios = {
         'eligible': False,
     },
     'not_whitelisted': {
-        'sql': ["delete from whitelisted_patient where patient_id = 'p001';"],
+        'sql': [
+            "delete from whitelisted_patient where patient_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
+        ],
         'eligible': False,
     },
     'did_not_discuss_research': {

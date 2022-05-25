@@ -30,7 +30,7 @@ d = {
         'referral_id': 'r001',
     },
     'whitelisted_patient': {
-        'patient_id': 'p001',
+        'patient_uid': '92943acf-12f4-4c9b-8bb2-068b81a1d3b7',
     },
 }
 
