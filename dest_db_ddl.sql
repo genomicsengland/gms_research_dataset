@@ -236,13 +236,11 @@ create table consent (
 comment on table consent is
 'Reference table for consent data used for generation of participant list';
 
--- generate random seed number for ID encryption
--- patient and referral IDs are 11 digits long, so make seed that long also
+-- table to accommodate the random seed for encryption (stored as
+-- environmental variable)
 create table encryption_seed (
     seed bigint
 );
-insert into encryption_seed (seed)
-select floor(random() * (99999999999 - 10000000000 + 1) + 10000000000);
 
 -- create table to hold release date
 create table release (

@@ -5,6 +5,7 @@ psql_cmd = psql -h $(DEST_DB_HOST) -p $(DEST_DB_PORT) -U $(DEST_DB_USER) $(DEST_
 build_dest_db:
 	$(psql_cmd) < dest_db_ddl.sql
 	$(psql_cmd) -c 'insert into release (version, release_date) values ($(RELEASE_VERSION), $(RELEASE_DATE)::text::date);'
+	$(psql_cmd) -c 'insert into encryption_seed values ($(ENCRYPTION_SEED));'
 
 drop_dest_db:
 	$(psql_cmd) < drop_dest_db.sql
