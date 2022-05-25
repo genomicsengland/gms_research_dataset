@@ -506,6 +506,9 @@ inner join vw_eligible_patient
 inner join closed_referral
     on referral_participant.referral_id = closed_referral.referral_id;
 
+create view vw_encryption_seed as
+select seed from encryption_seed;
+
 create view vw_condition as
 select
     vw_eligible_patient.encrypted_patient_id as patient_id,

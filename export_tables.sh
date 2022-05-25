@@ -3,7 +3,7 @@
 source .env
 export PGPASSFILE='.pgpass_dest'
 
-output_fldr=$EXPORT_LOCATION/GMS_RR_V$RELEASE_VERSION_$RELEASE_DATE
+output_fldr=$EXPORT_LOCATION/GMS_RR_V${RELEASE_VERSION}_$RELEASE_DATE
 output_fldr_ref=$output_fldr/reference
 
 echo -e "Exporting to: $output_fldr"
@@ -37,7 +37,8 @@ research_tables=(\
 reference_tables=(\
  "eligible_patient"\
  "eligible_referral"\
- "patient_list")
+ "patient_list"\
+ "encryption_seed")
 
 for i in ${research_tables[@]}
 do

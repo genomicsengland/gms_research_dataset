@@ -2,6 +2,7 @@
 drop view vw_condition cascade;
 drop view vw_eligible_patient cascade;
 drop view vw_eligible_referral cascade;
+drop view vw_encryption_seed cascade;
 drop view vw_observation cascade;
 drop view vw_observation_component cascade;
 drop view vw_patient cascade;
