@@ -642,12 +642,14 @@ left join dedup_sample
             and dedup_sample.sample_id_glh is not null
             and laboratory_sample.primary_sample_id_received_glh
             = dedup_sample.sample_id_glh
+            and laboratory_sample.referral_id = dedup_sample.referral_id
         )
         or (
             laboratory_sample.primary_sample_id_glh_lims is not null
             and dedup_sample.sample_id_glh is not null
             and laboratory_sample.primary_sample_id_glh_lims
             = dedup_sample.sample_id_glh
+            and laboratory_sample.referral_id = dedup_sample.referral_id
         )
     )
 inner join vw_eligible_patient
