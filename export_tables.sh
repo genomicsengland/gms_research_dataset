@@ -35,9 +35,10 @@ research_tables=(\
  "tumour_topography")
 
 reference_tables=(\
- "eligible_patient"\
- "eligible_referral"\
+ "patient_cohort"\
+ "referral_cohort"\
  "patient_list"\
+ "referral_list"\
  "encryption_seed")
 
 for i in ${research_tables[@]}

@@ -1,5 +1,6 @@
 import pandas as pd
 
+# first test patient
 d = {
     'patient': {
         'uid': '92943acf-12f4-4c9b-8bb2-068b81a1d3b7',
@@ -31,6 +32,33 @@ d = {
     },
     'whitelisted_patient': {
         'patient_uid': '92943acf-12f4-4c9b-8bb2-068b81a1d3b7',
+    },
+}
+
+# second test patient, in same referral as first
+e = {
+    'patient': {
+        'uid': 'bcc7f940-e22e-4a9d-bb29-e3c4a571aba5',
+        'patient_id': 'p002',
+        'patient_date_of_birth': '1950-01-01',
+        'life_status': 'alive',
+    },
+    'consent': {
+        'consent_uid': 'ddf5e1d9-fe44-4ef2-93e0-11898ff915ff',
+        'patient_uid': 'bcc7f940-e22e-4a9d-bb29-e3c4a571aba5',
+        'research_answer_given': 'yes',
+        'discussion_answer_given': 'yes',
+        'consent_category': 'Adult',
+        'consent_date': '2000-01-01',
+        'recency': 1,
+    },
+    'referral_participant': {
+        'uid': 'b8775173-029b-4700-a6bb-6783b9aaa02b',
+        'referral_id': 'r001',
+        'patient_id': 'p002',
+    },
+    'whitelisted_patient': {
+        'patient_uid': 'bcc7f940-e22e-4a9d-bb29-e3c4a571aba5',
     },
 }
 
