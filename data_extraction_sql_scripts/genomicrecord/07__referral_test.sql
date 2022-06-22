@@ -1,6 +1,7 @@
 select
     public.referral_test.uid,
-    public.referral_test.referral_test_expected_number_of_patients,
+    public.referral_test.referral_test_expected_number_of_patients
+    as referral_test_expected_number_of_participants,
     /* irrelevant/unclear    ,rt.ci_test_type_uid */
     public.referral.referral_human_readable_stored_id as referral_id
 /* no data    ,penetrance_concept.concept_code as penetrance */

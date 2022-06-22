@@ -1,6 +1,6 @@
 select
     public.condition.uid,
-    public.patient.patient_human_readable_stored_id as patient_id,
+    public.patient.patient_human_readable_stored_id as participant_id,
     /*no data    ,clinical_status_concept.concept_code as clinical_status */
     /*no data    ,verification_status_concept.concept_code
     as verification_status */

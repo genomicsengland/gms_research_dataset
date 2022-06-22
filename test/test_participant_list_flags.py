@@ -5,10 +5,10 @@ from test import data_for_testing
 import data_transfer
 
 
-class TestPatientListFlags(unittest.TestCase):
+class TestParticipantListFlags(unittest.TestCase):
     def setUp(self):
         """
-        build the intermediate database and load up the test patient data
+        build the intermediate database and load up the test participant data
         """
 
         subprocess.run(['make', 'build_dest_db'], capture_output=True)
@@ -30,7 +30,7 @@ class TestPatientListFlags(unittest.TestCase):
 
     def test_deceased_flag(self):
         """
-        test the deceased flag in vw_patient list
+        test the deceased flag in vw_participant list
         """
 
         # possible values for life status and corresponding expected value for
@@ -52,12 +52,12 @@ class TestPatientListFlags(unittest.TestCase):
             with data_transfer.get_dest_connection() as con:
 
                 con.execute(
-                    f"update patient set life_status = '{ls}' "
-                    "where patient_id = 'p001';"
+                    f"update participant set life_status = '{ls}' "
+                    "where participant_id = 'p001';"
                 )
 
                 d = data_transfer.read_sql_to_df(
-                    "select deceased from vw_patient_list where patient_id = 'p001';",
+                    "select deceased from vw_participant_list where participant_id = 'p001';",
                     con,
                 )
 
@@ -67,7 +67,7 @@ class TestPatientListFlags(unittest.TestCase):
 
     def test_withdrawn_flag(self):
         """
-        test the withdrawn flag in vw_patient_list
+        test the withdrawn flag in vw_participant_list
         """
 
         rag_to_withdrawn = {
@@ -83,11 +83,11 @@ class TestPatientListFlags(unittest.TestCase):
 
                 con.execute(
                     f"update consent set research_answer_given = '{rag}' "
-                    "where patient_uid =  '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
+                    "where participant_uid =  '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
                 )
 
                 d = data_transfer.read_sql_to_df(
-                    "select withdrawn from vw_patient_list where patient_id = 'p001';",
+                    "select withdrawn from vw_participant_list where participant_id = 'p001';",
                     con,
                 )
 
@@ -118,7 +118,7 @@ class TestPatientListFlags(unittest.TestCase):
                 )
 
                 d = data_transfer.read_sql_to_df(
-                    "select in_valid_referral from vw_patient_list where patient_id = 'p001';",
+                    "select in_valid_referral from vw_participant_list where participant_id = 'p001';",
                     con,
                 )
 
@@ -131,7 +131,7 @@ class TestPatientListFlags(unittest.TestCase):
         with data_transfer.get_dest_connection() as con:
 
             d = data_transfer.read_sql_to_df(
-                "select in_closed_case from vw_patient_list where patient_id = 'p001';",
+                "select in_closed_case from vw_participant_list where participant_id = 'p001';",
                 con,
             )
 
@@ -140,29 +140,29 @@ class TestPatientListFlags(unittest.TestCase):
             con.execute("delete from closed_referral where referral_id ='r001';")
 
             d = data_transfer.read_sql_to_df(
-                "select in_closed_case from vw_patient_list where patient_id = 'p001';",
+                "select in_closed_case from vw_participant_list where participant_id = 'p001';",
                 con,
             )
 
             self.assertFalse(d.in_closed_case[0])
 
-    def test_whitelisted_patient_flag(self):
+    def test_whitelisted_participant_flag(self):
 
         with data_transfer.get_dest_connection() as con:
 
             d = data_transfer.read_sql_to_df(
-                "select whitelisted from vw_patient_list where patient_id = 'p001';",
+                "select whitelisted from vw_participant_list where participant_id = 'p001';",
                 con,
             )
 
             self.assertTrue(d.whitelisted[0])
 
             con.execute(
-                "delete from whitelisted_patient where patient_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
+                "delete from whitelisted_participant where participant_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
             )
 
             d = data_transfer.read_sql_to_df(
-                "select whitelisted from vw_patient_list where patient_id = 'p001';",
+                "select whitelisted from vw_participant_list where participant_id = 'p001';",
                 con,
             )
 
@@ -182,11 +182,11 @@ class TestPatientListFlags(unittest.TestCase):
 
                 con.execute(
                     f"update consent set research_answer_given = '{ans}' "
-                    "where patient_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
+                    "where participant_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
                 )
 
                 d = data_transfer.read_sql_to_df(
-                    "select agreed_to_research from vw_patient_list where patient_id = 'p001';",
+                    "select agreed_to_research from vw_participant_list where participant_id = 'p001';",
                     con,
                 )
 
@@ -208,11 +208,11 @@ class TestPatientListFlags(unittest.TestCase):
 
                 con.execute(
                     f"update consent set discussion_answer_given = '{ans}' "
-                    "where patient_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
+                    "where participant_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
                 )
 
                 d = data_transfer.read_sql_to_df(
-                    "select discussed_research from vw_patient_list where patient_id = 'p001';",
+                    "select discussed_research from vw_participant_list where participant_id = 'p001';",
                     con,
                 )
 
@@ -235,11 +235,11 @@ class TestPatientListFlags(unittest.TestCase):
 
                 con.execute(
                     f"update consent set consent_category = '{cat}' "
-                    "where patient_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
+                    "where participant_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
                 )
 
                 d = data_transfer.read_sql_to_df(
-                    "select on_child_consent from vw_patient_list where patient_id = 'p001';",
+                    "select on_child_consent from vw_participant_list where participant_id = 'p001';",
                     con,
                 )
 
@@ -268,16 +268,16 @@ class TestPatientListFlags(unittest.TestCase):
 
                 con.execute(
                     f"update consent set consent_date = '{td['doc']}' "
-                    "where patient_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
+                    "where participant_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
                 )
 
                 con.execute(
-                    f"update patient set patient_date_of_birth = '{td['dob']}' "
-                    "where patient_id = 'p001';"
+                    f"update participant set participant_date_of_birth = '{td['dob']}' "
+                    "where participant_id = 'p001';"
                 )
 
                 d = data_transfer.read_sql_to_df(
-                    "select under_sixteen_at_consent from vw_patient_list where patient_id = 'p001';",
+                    "select under_sixteen_at_consent from vw_participant_list where participant_id = 'p001';",
                     con,
                 )
 
@@ -307,12 +307,12 @@ class TestPatientListFlags(unittest.TestCase):
                 con.execute(f"update release set release_date = '{td['dor']}';")
 
                 con.execute(
-                    f"update patient set patient_date_of_birth = '{td['dob']}' "
-                    "where patient_id = 'p001';"
+                    f"update participant set participant_date_of_birth = '{td['dob']}' "
+                    "where participant_id = 'p001';"
                 )
 
                 d = data_transfer.read_sql_to_df(
-                    "select under_sixteen_at_release from vw_patient_list where patient_id = 'p001';",
+                    "select under_sixteen_at_release from vw_participant_list where participant_id = 'p001';",
                     con,
                 )
 

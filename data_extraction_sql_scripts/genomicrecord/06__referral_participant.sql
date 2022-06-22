@@ -1,7 +1,7 @@
 select
     public.referral_participant.uid,
     public.referral.referral_human_readable_stored_id as referral_id,
-    public.patient.patient_human_readable_stored_id as patient_id,
+    public.patient.patient_human_readable_stored_id as participant_id,
     public.referral_participant.referral_participant_is_proband,
     /* no data    ,rp.additional_data */
     /* no data    ,consanguinity_concept.concept_code as consanguinity */

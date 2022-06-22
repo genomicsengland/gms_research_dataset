@@ -24,7 +24,7 @@ research_tables=(\
  "condition"\
  "observation"\
  "observation_component"\
- "patient"\
+ "participant"\
  "plated_sample"\
  "referral"\
  "referral_participant"\
@@ -35,9 +35,9 @@ research_tables=(\
  "tumour_topography")
 
 reference_tables=(\
- "patient_cohort"\
+ "participant_cohort"\
  "referral_cohort"\
- "patient_list"\
+ "participant_list"\
  "referral_list"\
  "encryption_seed")
 

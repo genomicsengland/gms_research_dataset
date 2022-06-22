@@ -1,6 +1,6 @@
 select
     public.observation.uid,
-    public.patient.patient_human_readable_stored_id as patient_id,
+    public.patient.patient_human_readable_stored_id as participant_id,
     public.observation.observation_effective_from,
     /* no data    ,o.observation_effective_to */
     code_concept.concept_code as code,

@@ -21,7 +21,7 @@ test_scenarios = {
     },
     'not_whitelisted': {
         'sql': [
-            "delete from whitelisted_patient where patient_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
+            "delete from whitelisted_participant where participant_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
         ],
         'eligible': False,
     },
@@ -29,7 +29,7 @@ test_scenarios = {
         'sql': [
             (
                 "update consent set discussion_answer_given = 'no' "
-                "where patient_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
+                "where participant_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
             )
         ],
         'eligible': False,
@@ -38,14 +38,14 @@ test_scenarios = {
         'sql': [
             (
                 "update consent set research_answer_given = 'no' "
-                "where patient_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
+                "where participant_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
             )
         ],
         'eligible': False,
     },
     'deceased': {
         'sql': [
-            "update patient set life_status = 'deceased' where patient_id = 'p001';"
+            "update participant set life_status = 'deceased' where participant_id = 'p001';"
         ],
         'eligible': True,
     },
@@ -53,15 +53,15 @@ test_scenarios = {
         'sql': [
             (
                 "update consent set consent_category = 'Child' "
-                "where patient_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
+                "where participant_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
             ),
             (
-                "update patient set patient_date_of_birth = '2000-01-01' "
-                "where patient_id = 'p001';"
+                "update participant set participant_date_of_birth = '2000-01-01' "
+                "where participant_id = 'p001';"
             ),
             (
                 "update consent set consent_date = '2016-01-02' "
-                "where patient_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
+                "where participant_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
             ),
         ],
         'eligible': False,
@@ -70,17 +70,17 @@ test_scenarios = {
         'sql': [
             (
                 "update consent set consent_category = 'Child' "
-                "where patient_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
+                "where participant_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
             ),
             (
-                "update patient set patient_date_of_birth = '2000-01-01' "
-                "where patient_id = 'p001';"
+                "update participant set participant_date_of_birth = '2000-01-01' "
+                "where participant_id = 'p001';"
             ),
             (
                 "update consent set consent_date = '2015-12-31' "
-                "where patient_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
+                "where participant_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
             ),
-            "update patient set life_status = 'deceased' where patient_id = 'p001';",
+            "update participant set life_status = 'deceased' where participant_id = 'p001';",
         ],
         'eligible': True,
     },
@@ -88,19 +88,19 @@ test_scenarios = {
         'sql': [
             (
                 "update consent set consent_category = 'Child' "
-                "where patient_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
+                "where participant_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
             ),
             (
-                "update patient set patient_date_of_birth = '2000-01-01' "
-                "where patient_id = 'p001';"
+                "update participant set participant_date_of_birth = '2000-01-01' "
+                "where participant_id = 'p001';"
             ),
             (
                 "update consent set consent_date = '2016-01-02' "
-                "where patient_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
+                "where participant_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
             ),
             (
-                "update patient set life_status = 'deceased' "
-                "where patient_id = 'p001';"
+                "update participant set life_status = 'deceased' "
+                "where participant_id = 'p001';"
             ),
         ],
         'eligible': False,
@@ -109,11 +109,11 @@ test_scenarios = {
         'sql': [
             (
                 "update consent set consent_category = 'Child' "
-                "where patient_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
+                "where participant_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
             ),
             (
-                "update patient set patient_date_of_birth = '2000-01-01' "
-                "where patient_id = 'p001';"
+                "update participant set participant_date_of_birth = '2000-01-01' "
+                "where participant_id = 'p001';"
             ),
             "update release set release_date = '2015-12-31';",
         ],
@@ -123,11 +123,11 @@ test_scenarios = {
         'sql': [
             (
                 "update consent set consent_category = 'Child' "
-                "where patient_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
+                "where participant_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
             ),
             (
-                "update patient set patient_date_of_birth = '2000-01-01' "
-                "where patient_id = 'p001';"
+                "update participant set participant_date_of_birth = '2000-01-01' "
+                "where participant_id = 'p001';"
             ),
             "update release set release_date = '2016-01-02';",
         ],
@@ -137,15 +137,15 @@ test_scenarios = {
         'sql': [
             (
                 "update consent set consent_category = 'Child' "
-                "where patient_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
+                "where participant_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
             ),
             (
-                "update patient set patient_date_of_birth = '2000-01-01' "
-                "where patient_id = 'p001';"
+                "update participant set participant_date_of_birth = '2000-01-01' "
+                "where participant_id = 'p001';"
             ),
             (
                 "update consent set consent_date = '2016-01-02' "
-                "where patient_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
+                "where participant_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
             ),
             "update release set release_date = '2016-01-02';",
         ],
@@ -155,16 +155,16 @@ test_scenarios = {
         'sql': [
             (
                 "update consent set consent_category = 'Child' "
-                "where patient_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
+                "where participant_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
             ),
             (
-                "update patient set patient_date_of_birth = '2000-01-01' "
-                "where patient_id = 'p001';"
+                "update participant set participant_date_of_birth = '2000-01-01' "
+                "where participant_id = 'p001';"
             ),
             "update release set release_date = '2016-01-02';",
             (
-                "update patient set life_status = 'deceased' "
-                "where patient_id = 'p001';"
+                "update participant set life_status = 'deceased' "
+                "where participant_id = 'p001';"
             ),
         ],
         'eligible': True,
@@ -172,10 +172,10 @@ test_scenarios = {
 }
 
 
-class TestPatientEligibilityLogic(unittest.TestCase):
+class TestParticipantEligibilityLogic(unittest.TestCase):
     def setUp(self):
         """
-        build the intermediate database and load up the test patient data
+        build the intermediate database and load up the test participant data
         """
 
         subprocess.run(['make', 'build_dest_db'], capture_output=True)
@@ -210,7 +210,8 @@ def test_generator(sql_stmts, eligible):
                 con.execute(x)
 
             d = data_transfer.read_sql_to_df(
-                "select eligible from vw_patient_list where patient_id = 'p001';", con
+                "select eligible from vw_participant_list where participant_id = 'p001';",
+                con,
             )
 
         self.assertEqual(eligible, d.eligible[0])
@@ -223,5 +224,5 @@ def test_generator(sql_stmts, eligible):
 for ts, td in test_scenarios.items():
 
     test = test_generator(td['sql'], td['eligible'])
-    test.__name__ = f'test_patient_eligibility_logic_{ts}'
-    setattr(TestPatientEligibilityLogic, test.__name__, test)
+    test.__name__ = f'test_participant_eligibility_logic_{ts}'
+    setattr(TestParticipantEligibilityLogic, test.__name__, test)

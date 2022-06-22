@@ -1,4 +1,4 @@
--- get all consent data per patient
+-- get all consent data per participant
 -- R2 answer to each consent event and consent category (adult/child)
 with all_data as ( -- noqa: L042
     with consent_questions as ( -- noqa: L042
@@ -43,7 +43,7 @@ with all_data as ( -- noqa: L042
 
 select
     consent_uid,
-    patient_uid,
+    patient_uid as participant_uid,
     discussion_answer_given,
     research_answer_given,
     consent_category,

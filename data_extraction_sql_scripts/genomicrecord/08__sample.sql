@@ -3,7 +3,7 @@ select
     /* no data    ,body_site_concept.concept_code as body_site */
     /* unclear    ,s.other_referral_request_uid */
     /* no data    ,s.parent_uid */
-    public.patient.patient_human_readable_stored_id as patient_id,
+    public.patient.patient_human_readable_stored_id as participant_id,
     public.sample.percentage_of_malignant_cells,
     sample_morphology_concept.concept_code as sample_morphology,
     /* no data    ,s.sample_number_of_slides */

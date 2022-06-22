@@ -1,6 +1,6 @@
 select
     public.tumour.uid,
-    public.patient.patient_human_readable_stored_id as patient_id,
+    public.patient.patient_human_readable_stored_id as participant_id,
     tumour_type_concept.concept_code as tumour_type,
     /* no data    ,grade_concept.concept_code as grade */
     /* no data    ,t.parent_tumour_uid */

@@ -5,37 +5,37 @@ from test import data_for_testing
 import data_transfer
 
 # establish all the difference scenarios we want to test, the sql we need to
-# run against the test data, and who should be in the patient_cohort and
+# run against the test data, and who should be in the participant_cohort and
 # referral_cohort
 test_scenarios = {
     'no_change_to_test_participants': {
         'sql': [],
         'referral_cohort': ['r001'],
-        'patient_cohort': ['p001', 'p002'],
+        'participant_cohort': ['p001', 'p002'],
     },
     'one_participant_ineligible': {
         'sql': [
             (
                 "update consent set discussion_answer_given = 'no' "
-                "where patient_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
+                "where participant_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
             )
         ],
         'referral_cohort': [],
-        'patient_cohort': [],
+        'participant_cohort': [],
     },
     'both_participant_ineligible': {
         'sql': [
             (
                 "update consent set discussion_answer_given = 'no' "
-                "where patient_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
+                "where participant_uid = '92943acf-12f4-4c9b-8bb2-068b81a1d3b7';"
             ),
             (
                 "update consent set discussion_answer_given = 'no' "
-                "where patient_uid = 'bcc7f940-e22e-4a9d-bb29-e3c4a571aba5';"
+                "where participant_uid = 'bcc7f940-e22e-4a9d-bb29-e3c4a571aba5';"
             ),
         ],
         'referral_cohort': [],
-        'patient_cohort': [],
+        'participant_cohort': [],
     },
     'two_separate_referrals_one_ineligible': {
         'sql': [
@@ -44,11 +44,11 @@ test_scenarios = {
                 "'c6d8d302-aa64-412b-b0c1-4519ae771729', 'r002', 'active'"
                 ');'
                 "update referral_participant set referral_id = 'r002' "
-                "where patient_id = 'p002';"
+                "where participant_id = 'p002';"
             )
         ],
         'referral_cohort': ['r001'],
-        'patient_cohort': ['p001'],
+        'participant_cohort': ['p001'],
     },
     'two_separate_referrals_both_eligible': {
         'sql': [
@@ -59,11 +59,11 @@ test_scenarios = {
                 'insert into closed_referral (referral_id) values ('
                 "'r002');"
                 "update referral_participant set referral_id = 'r002' "
-                "where patient_id = 'p002';"
+                "where participant_id = 'p002';"
             )
         ],
         'referral_cohort': ['r001', 'r002'],
-        'patient_cohort': ['p001', 'p002'],
+        'participant_cohort': ['p001', 'p002'],
     },
     'multiple_referrals_ineligible_referral': {
         'sql': [
@@ -71,12 +71,12 @@ test_scenarios = {
                 'insert into referral (uid, referral_id, status) values ('
                 "'c6d8d302-aa64-412b-b0c1-4519ae771729', 'r002', 'active'"
                 ');'
-                'insert into referral_participant (uid, patient_id, referral_id) '
+                'insert into referral_participant (uid, participant_id, referral_id) '
                 "values ('51535024-f19a-4f94-983d-08a3f2146eea', 'p002', 'r002');"
             )
         ],
         'referral_cohort': ['r001'],
-        'patient_cohort': ['p001', 'p002'],
+        'participant_cohort': ['p001', 'p002'],
     },
     'multiple_referrals_eligible_referral': {
         'sql': [
@@ -86,12 +86,12 @@ test_scenarios = {
                 ');'
                 'insert into closed_referral (referral_id) values ('
                 "'r002');"
-                'insert into referral_participant (uid, patient_id, referral_id) '
+                'insert into referral_participant (uid, participant_id, referral_id) '
                 "values ('51535024-f19a-4f94-983d-08a3f2146eea', 'p002', 'r002');"
             )
         ],
         'referral_cohort': ['r001', 'r002'],
-        'patient_cohort': ['p001', 'p002'],
+        'participant_cohort': ['p001', 'p002'],
     },
 }
 
@@ -99,7 +99,7 @@ test_scenarios = {
 class TestReferralEligibilityLogic(unittest.TestCase):
     def setUp(self):
         """
-        build the intermediate database and load up the test patient data
+        build the intermediate database and load up the test participant data
         """
 
         subprocess.run(['make', 'build_dest_db'], capture_output=True)
@@ -125,7 +125,7 @@ class TestReferralEligibilityLogic(unittest.TestCase):
         subprocess.run(['make', 'drop_dest_db'], capture_output=True)
 
 
-def test_generator(sql_stmts, referral_cohort, patient_cohort):
+def test_generator(sql_stmts, referral_cohort, participant_cohort):
     """
     generate a test function to attach to the unittest subclass
     """
@@ -148,14 +148,14 @@ def test_generator(sql_stmts, referral_cohort, patient_cohort):
 
             pc = (
                 data_transfer.read_sql_to_df(
-                    'select patient_id from vw_patient_cohort;', con
+                    'select participant_id from vw_participant_cohort;', con
                 )
-                .patient_id.sort_values()
+                .participant_id.sort_values()
                 .tolist()
             )
 
         self.assertListEqual(referral_cohort, rc)
-        self.assertListEqual(patient_cohort, pc)
+        self.assertListEqual(participant_cohort, pc)
 
     return test
 
@@ -164,6 +164,6 @@ def test_generator(sql_stmts, referral_cohort, patient_cohort):
 # test scenario
 for ts, td in test_scenarios.items():
 
-    test = test_generator(td['sql'], td['referral_cohort'], td['patient_cohort'])
+    test = test_generator(td['sql'], td['referral_cohort'], td['participant_cohort'])
     test.__name__ = f'test_referral_eligibility_logic_{ts}'
     setattr(TestReferralEligibilityLogic, test.__name__, test)

@@ -1,8 +1,9 @@
 select
     public.patient.uid,
-    public.patient.patient_human_readable_stored_id as patient_id,
-    public.patient.patient_date_of_birth,
-    public.patient.patient_is_foetal_patient,
+    public.patient.patient_human_readable_stored_id as participant_id,
+    public.patient.patient_date_of_birth as participant_date_of_birth,
+    public.patient.patient_is_foetal_patient
+    as participant_is_foetal_participant,
     administrative_gender_concept.concept_code as administrative_gender,
     /* no data    ,p.patient_fetus_current_gestation */
     /* no data    ,p.patient_fetus_current_gestation_unit */
@@ -16,7 +17,7 @@ select
     phenotypic_sex_concept.concept_code as phenotypic_sex,
     extract(
         'year' from public.patient.patient_date_of_death
-    ) as patient_year_of_death
+    ) as participant_year_of_death
 from public.patient
 left join
     public.concept as administrative_gender_concept on

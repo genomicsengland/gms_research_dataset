@@ -21,7 +21,7 @@ select
     /* irrelevant    ,clinical_indication_test_type_id */
     /* irrelevant    ,clinical_indication_test_type_uid */
     /* irrelevant    ,patient_nhs_number */
-    patient_ngis_id as patient_id,
+    patient_ngis_id as participant_id,
     /* irrelevant    ,ordering_entity_id */
     /* irrelevant    ,glh_laboratory_id */
     /* irrelevant    ,primary_sample_received_date */
