@@ -555,7 +555,6 @@ select seed from encryption_seed;
 create view vw_condition as
 select
     vw_participant_cohort.encrypted_participant_id as participant_id,
-    condition.uid,
     condition.certainty,
     condition.code,
     condition.code_description
@@ -578,7 +577,6 @@ inner join vw_participant_cohort
 create view vw_observation_component as
 select
     vw_observation.participant_id,
-    observation_component.uid,
     observation_component.observation_uid,
     observation_component.observation_component_code,
     observation_component.observation_component_code_description,
@@ -590,7 +588,6 @@ inner join vw_observation
 create view vw_participant as
 select
     vw_participant_cohort.encrypted_participant_id as participant_id,
-    participant.uid,
     participant.participant_year_of_death,
     participant.participant_is_foetal_participant,
     participant.administrative_gender,
@@ -610,7 +607,6 @@ create view vw_referral_participant as
 select
     vw_participant_cohort.encrypted_participant_id as participant_id,
     vw_referral_cohort.encrypted_referral_id as referral_id,
-    referral_participant.uid,
     referral_participant.referral_participant_is_proband,
     referral_participant.disease_status,
     referral_participant.referral_participant_age_at_onset,
@@ -626,7 +622,6 @@ inner join vw_referral_cohort
 create view vw_referral as
 select
     vw_referral_cohort.encrypted_referral_id as referral_id,
-    referral.uid,
     referral.status,
     referral.priority,
     clinical_indication.clinical_indication_code,
@@ -645,7 +640,6 @@ inner join vw_referral_cohort
 create view vw_referral_test as
 select
     vw_referral_cohort.encrypted_referral_id as referral_id,
-    referral_test.uid,
     referral_test.referral_test_expected_number_of_participants
 from referral_test
 inner join vw_referral_cohort
@@ -738,7 +732,6 @@ inner join
 create view vw_tumour_morphology as
 select
     vw_tumour.participant_id,
-    tumour_morphology.uid,
     tumour_morphology.tumour_uid,
     tumour_morphology.morphology,
     tumour_morphology.morphology_description
@@ -748,7 +741,6 @@ inner join vw_tumour on vw_tumour.uid = tumour_morphology.tumour_uid;
 create view vw_tumour_topography as
 select
     vw_tumour.participant_id,
-    tumour_topography.uid,
     tumour_topography.tumour_uid,
     tumour_topography.actual_body_site,
     tumour_topography.actual_body_site_description,
