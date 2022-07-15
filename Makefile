@@ -17,3 +17,8 @@ build_and_populate: build_dest_db populate_data
 
 export_dataset:
 	bash export_tables.sh
+
+run_unittests:
+	python -m unittest -v
+
+run_tests: drop_dest_db run_unittests
