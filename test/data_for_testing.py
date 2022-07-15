@@ -2,6 +2,10 @@ import pandas as pd
 
 # first test participant
 d = {
+    'clinical_indication': {
+        'uid': 'e5bac87a-3f34-4c55-8594-a9b7b4ce935c',
+        'clinical_indication_code': 'M001',
+    },
     'participant': {
         'uid': '92943acf-12f4-4c9b-8bb2-068b81a1d3b7',
         'participant_id': 'p001',
@@ -21,6 +25,7 @@ d = {
         'uid': '362635c4-6227-479e-9197-3b7196317759',
         'referral_id': 'r001',
         'status': 'active',
+        'clinical_indication_uid': 'e5bac87a-3f34-4c55-8594-a9b7b4ce935c',
     },
     'referral_participant': {
         'uid': 'aa3097ec-ed5d-4785-b9f0-c6e689a5f609',

@@ -4,7 +4,8 @@ create extension if not exists "uuid-ossp"; -- noqa: L057
 -- reference tables
 create table clinical_indication (
     uid uuid,
-    clinical_indication_code varchar,
+    clinical_indication_code varchar constraint valid_ci_code_category
+    check (left(clinical_indication_code, 1) in ('M', 'R')),
     clinical_indication_full_name varchar,
     primary key (uid)
 );
@@ -620,12 +621,18 @@ inner join vw_referral_cohort
     on referral_participant.referral_id = vw_referral_cohort.referral_id;
 
 create view vw_referral as
-select
+select -- noqa: L034
     vw_referral_cohort.encrypted_referral_id as referral_id,
     referral.status,
     referral.priority,
     clinical_indication.clinical_indication_code,
     clinical_indication.clinical_indication_full_name,
+    case
+        when left(clinical_indication.clinical_indication_code, 1) = 'M'
+            then 'cancer'
+        when left(clinical_indication.clinical_indication_code, 1) = 'R'
+            then 'rare_diseases'
+    end as category,
     ordering_entity.ordering_entity_name,
     ordering_entity.ordering_entity_code,
     referral.tumour_uid
