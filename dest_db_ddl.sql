@@ -208,6 +208,7 @@ laboratories';
 create table plated_sample (
     gel1001_id bigint,
     platekey varchar,
+    date_of_dispatch timestamp,
     primary key (platekey),
     foreign key (gel1001_id) references laboratory_sample (gel1001_id)
 );
@@ -712,6 +713,7 @@ create view vw_plated_sample as
 select
     vw_sample.participant_id,
     plated_sample.platekey,
+    plated_sample.date_of_dispatch,
     plated_sample_qc.illumina_qc_status,
     plated_sample_qc.illumina_sample_concentration,
     plated_sample_qc.dna_amount,
