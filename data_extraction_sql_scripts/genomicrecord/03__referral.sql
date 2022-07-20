@@ -11,6 +11,7 @@ select
     public.referral.clinical_indication_uid,
     /* irrelevant    ,reason_declined_concept.concept_code as reason_declined */
     public.referral.ordering_entity_uid,
+    public.referral.referral_date_submitted as date_submitted,
     public.referral.tumour_uid
 /* no data    ,r.additional_data */
 /* poss PID    ,r.referral_notes */

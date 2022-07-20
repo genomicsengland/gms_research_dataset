@@ -60,6 +60,7 @@ create table referral (
     priority varchar,
     clinical_indication_uid uuid,
     ordering_entity_uid uuid,
+    date_submitted date,
     tumour_uid uuid,
     primary key (uid),
     foreign key (tumour_uid) references tumour (uid),
@@ -635,6 +636,7 @@ select -- noqa: L034
     end as category,
     ordering_entity.ordering_entity_name,
     ordering_entity.ordering_entity_code,
+    referral.date_submitted,
     referral.tumour_uid
 from referral
 left join clinical_indication
